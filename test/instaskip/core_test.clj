@@ -9,4 +9,4 @@
 
 (deftest eskip-test
   (testing "Some route is parsed"
-    (is (= (eskip "hello: predicate1() && predicate2(\"arg1\", 4.3) -> filter1(\"arg1\") -> filter2(\"arg1\", 4.3, \"arg2\") -> filter3() -> backend") []))))
+    (is (= (eskip-routes-parser "hello: predicate1() && predicate2(\"arg1\", 4.3) -> filter1(\"arg1\") -> filter2(\"arg1\", 4.3, \"arg2\") -> filter3() -> backend") []))))
