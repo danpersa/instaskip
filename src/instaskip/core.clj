@@ -2,14 +2,6 @@
   (:require [instaparse.core :as insta])
   (:gen-class))
 
-(def as-and-bs
-  (insta/parser
-    "S = AB*
-     AB = A B
-     A = 'a'+
-     B = 'b'+"))
-
-
 (def eskip
   (insta/parser
     "
