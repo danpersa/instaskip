@@ -5,7 +5,8 @@
 (def eskip
   (insta/parser
     "
-     eskip            = name <':'> predicates <'->'> (filter <'->'> )* backend
+     eskip-file       = eskip+
+     eskip            = name <':'> predicates <'->'> (filter <'->'> )* backend <';'>
      name             = #'[a-zA-Z0-9]+'
      predicates       = predicate? (<'&&'> predicate)*
      predicate        = predicate-name <'('> predicate-arg? (<','> predicate-arg)* <')'>
@@ -24,11 +25,13 @@
     :auto-whitespace :standard))
 
 
-(let [eskip-route "hello: predicate1(/^.*$/) && predicate2(\"arg1\", 4.3) 
-                   -> filter1(\"arg1\") 
-                   -> filter2(\"arg1\", 4.3, \"arg2\") 
-                   -> filter3() 
-                   -> <shunt>"]
+(let [eskip-route "
+                   hello: predicate1(/^.*$/) && predicate2(\"arg1\", 4.3)
+                   -> filter1(\"arg1\")
+                   -> filter2(\"arg1\", 4.3, \"arg2\")
+                   -> filter3()
+                   -> <shunt>;
+                   hello1: <shunt>;"]
   (defn -main
     "I don't do a whole lot ... yet."
     [& args]
