@@ -1,7 +1,11 @@
 (ns instaskip.core
   (:require [instaparse.core :as insta]
             [clojure.data.json :as json])
-  (:gen-class))
+  (:gen-class
+    :name instaskip.Eskip
+    :methods [[eskipToJson [String] String]]
+    :main false
+    :constructors {[] []}))
 
 (def ^:private eskip-routes-parser
   "returns an parser for eskip routes"
@@ -69,6 +73,12 @@
   (json/write-str
     (transform-ast-to-map
       (eskip-routes-parser eskip-routes))))
+
+(defn -eskipToJson
+  "Transforms an eskip routes string to a json string java wrapper"
+  [eskip-routes]
+  
+  (eskip->json eskip-routes))
 
 (def ^:private sample-eskip-routes "
                    hello: predicate1(/^.*$/) && predicate2(\"arg1\", 4.3)
