@@ -1,10 +1,22 @@
-# instaskip
+# Instaskip
 
-FIXME: description
+Transforms from eskip to json to eskip.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Download from https://clojars.org/org.clojars.danpersa/instaskip.
+
+For maven users
+
+    <dependency>
+      <groupId>org.clojars.danpersa</groupId>
+      <artifactId>instaskip</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+
+## Publishing
+
+     lein deploy clojars
 
 ## Usage
 
@@ -30,7 +42,6 @@ FIXME: listing of options this app accepts.
 
 ## License
 
-Copyright © 2016 FIXME
+Copyright © 2016 Dan Persa
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the MIT License.

@@ -11,7 +11,7 @@
      route            = name <':'> predicates <'->'> filters endpoint <';'>
      name             = #'[a-zA-Z0-9]+'
      filters          = (filter <'->'> )*
-     predicates       = predicate? (<'&&'> predicate)*
+     predicates       = predicate (<'&&'> predicate)* | star
      predicate        = predicate-name <'('> predicate-arg? (<','> predicate-arg)* <')'>
      predicate-name   = #'[a-zA-Z0-9]*'
      predicate-arg    = string | number | regexval
@@ -20,6 +20,7 @@
      filter-arg       = string | number
      endpoint         = string | shunt
      shunt            = #'<shunt>'
+     star             = #'\\*'
      string           = <quote> #'[^\"]*' <quote>
      quote            = #'\"'
      number           = #'[0-9]+\\.[0-9]*'
@@ -43,8 +44,9 @@
   [ast]
 
   (insta/transform
-    {:shunt          (fn [sh] "")
+    {:shunt          (fn [_] "")
      :string         identity
+     :star           (fn [star] {:name star :args []})
      :number         str->num
      :regexval       identity
      :filter-name    identity
@@ -68,20 +70,26 @@
     (transform-ast-to-map
       (eskip-routes-parser eskip-routes))))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-
-  (println "Hello, Instaskip!")
-  (let [eskip-routes "
+(def ^:private sample-eskip-routes "
                    hello: predicate1(/^.*$/) && predicate2(\"arg1\", 4.3)
                    -> filter1(\"arg1\")
                    -> filter2(\"arg1\", 4.3, \"arg2\")
                    -> filter3()
                    -> \"https://hello.com\";
-                   hello1: -> <shunt>;"]
-    (print
-      (eskip->json eskip-routes)))
+                   hello1: pred1(\"hello\") -> <shunt>;
+                   hello2: * -> <shunt>;")
+
+(defn -main
+  "I don't do a whole lot ... yet."
+  [& args]
+
+  (println "Hello, Instaskip!")
+
+  (transform-ast-to-map
+    (eskip-routes-parser sample-eskip-routes))
+
+  (print
+    (eskip->json sample-eskip-routes))
 
   ;(insta/visualize
   ;  (eskip eskip-route))
