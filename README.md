@@ -9,12 +9,16 @@ Transforms from eskip to json to eskip.
 
 Download from https://clojars.org/org.clojars.danpersa/instaskip.
 
+For lein users
+
+    [org.clojars.danpersa/instaskip 0.2.0]
+
 For maven users
 
     <dependency>
       <groupId>org.clojars.danpersa</groupId>
       <artifactId>instaskip</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>0.2.0</version>
     </dependency>
 
 ## Publishing
@@ -25,7 +29,9 @@ For maven users
 
 FIXME: explanation
 
-    $ java -jar instaskip-0.1.0-standalone.jar [args]
+    $ java -jar instaskip-0.2.0-standalone.jar [args]
+
+Running the tests: `lein midje`
 
 ## Options
 

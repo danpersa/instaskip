@@ -27,13 +27,15 @@
      star             = #'\\*'
      string           = <quote> #'[^\"]*' <quote>
      quote            = #'\"'
-     number           = #'[0-9]+\\.[0-9]*'
+     number           = decimal-number | int-number
+     decimal-number   = #'[0-9]+\\.[0-9]*'
+     int-number       = #'[0-9]+'
      regexval         = #'\\/\\^[^$]*\\$/'
      "
     :auto-whitespace :standard
     :output-format :hiccup))
 
-(defn- str->num
+(defn- ^{:testable true} str->num
   "Transforms a string to a number"
   [str]
 
@@ -51,8 +53,10 @@
     {:shunt          (fn [_] "")
      :string         identity
      :star           (fn [star] {:name star :args []})
+     :int-number     identity
+     :decimal-number identity
      :number         str->num
-     :regexval       identity
+     :regexval       str
      :filter-name    identity
      :filter-arg     identity
      :filter         name-and-args-to-map
@@ -64,7 +68,7 @@
      :route          (fn [& args] (into {} (concat args)))
      :routes         (fn [& args] (vec (concat args)))
      }
-     ast))
+    ast))
 
 (defn eskip->json
   "Transforms an eskip routes string to a json string"
@@ -77,7 +81,7 @@
 (defn -eskipToJson
   "Transforms an eskip routes string to a json string java wrapper"
   [eskip-routes]
-  
+
   (eskip->json eskip-routes))
 
 (def ^:private sample-eskip-routes "
@@ -87,7 +91,7 @@
                    -> filter3()
                    -> \"https://hello.com\";
                    hello1: pred1(\"hello\") -> <shunt>;
-                   hello2: * -> <shunt>;")
+                   hello2: * -> \"http://hello.com\";")
 
 (defn -main
   "I don't do a whole lot ... yet."
