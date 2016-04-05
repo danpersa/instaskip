@@ -1,11 +1,10 @@
-(ns instaskip.core-test
+(ns instaskip.impl.from-eskip-facts
   (:require [midje.sweet :refer :all]
-            [instaskip.core :refer :all]
-            [midje.util :only [expose-testables]]
+            [instaskip.impl.from-eskip :refer :all]
+            [midje.util :refer [expose-testables]]
             [clojure.string :refer [join]]))
 
-(midje.util/expose-testables instaskip.core)
-
+(expose-testables instaskip.impl.from-eskip)
 
 (fact "str->num should transform a string representing an Integer to a number"
   (str->num "4") => 4)
@@ -72,3 +71,10 @@
            "\"predicates\":[{\"name\":\"*\",\"args\":[]}],"
            "\"filters\":[],"
            "\"endpoint\":\"http:\\/\\/hello.com\"}]"))
+
+(fact "single-eskip->json parses a simple route"
+      (single-eskip->json "hello1: pred1() -> <shunt>;") =>
+      (str "{\"name\":\"hello1\","
+           "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
+           "\"filters\":[],"
+           "\"endpoint\":\"\"}"))

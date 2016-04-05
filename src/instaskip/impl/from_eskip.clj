@@ -1,11 +1,6 @@
-(ns instaskip.core
+(ns instaskip.impl.from-eskip
   (:require [instaparse.core :as insta]
-            [clojure.data.json :as json])
-  (:gen-class
-    :name instaskip.Eskip
-    :methods [[eskipToJson [String] String]]
-    :main false
-    :constructors {[] []}))
+            [clojure.data.json :as json]))
 
 (def ^:private eskip-routes-parser
   "returns an parser for eskip routes"
@@ -71,40 +66,18 @@
     ast))
 
 (defn eskip->json
-  "Transforms an eskip routes string to a json string"
+  "Transforms an eskip routes string to a json array string"
   [eskip-routes]
 
   (json/write-str
     (transform-ast-to-map
       (eskip-routes-parser eskip-routes))))
 
-(defn -eskipToJson
-  "Transforms an eskip routes string to a json string java wrapper"
+(defn single-eskip->json
+  "Transforms an eskip route string to a json string"
   [eskip-routes]
 
-  (eskip->json eskip-routes))
-
-(def ^:private sample-eskip-routes "
-                   hello: predicate1(/^.*$/) && predicate2(\"arg1\", 4.3)
-                   -> filter1(\"arg1\")
-                   -> filter2(\"arg1\", 4.3, \"arg2\")
-                   -> filter3()
-                   -> \"https://hello.com\";
-                   hello1: pred1(\"hello\") -> <shunt>;
-                   hello2: * -> \"http://hello.com\";")
-
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-
-  (println "Hello, Instaskip!")
-
-  (transform-ast-to-map
-    (eskip-routes-parser sample-eskip-routes))
-
-  (print
-    (eskip->json sample-eskip-routes))
-
-  ;(insta/visualize
-  ;  (eskip eskip-route))
-  )
+  (json/write-str
+    (first 
+      (transform-ast-to-map
+       (eskip-routes-parser eskip-routes)))))
