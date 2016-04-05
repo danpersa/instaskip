@@ -5,6 +5,7 @@
   (:gen-class
     :name instaskip.Eskip
     :methods [#^{:static true} [eskipToJson [String] String]
+              #^{:static true} [singleEskipToJson [String] String]
               #^{:static true} [jsonToEskip [String] String]]
     :main false))
 
@@ -30,7 +31,7 @@
   "Transforms an eskip route string to a json string - java wrapper"
   [eskip-routes]
 
-  (eskip->json eskip-routes))
+  (single-eskip->json eskip-routes))
 
 (defn json->eskip
   "Transforms a json string into an eskip routes string"
