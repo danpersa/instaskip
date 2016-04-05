@@ -15,8 +15,14 @@
                        "\n   -> \"http://www.hello.com/hello\";"))
 
 (fact "should transform simple routes to json and back to eskip"
-      (json->eskip (eskip->json simple-eskip-routes)) => simple-eskip-routes)
+      (-> simple-eskip-routes
+          (eskip->json)
+          (json->eskip))
+      => simple-eskip-routes)
 
 
 (fact "should transform to json and back to eskip"
-      (json->eskip (eskip->json eskip-routes)) => eskip-routes)
+      (-> eskip-routes
+          (eskip->json)
+          (json->eskip))
+      => eskip-routes)

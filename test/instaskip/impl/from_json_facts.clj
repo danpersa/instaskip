@@ -28,16 +28,28 @@
        "\"endpoint\":\"\"}]"))
 
 (fact "should extract the predicates"
-      (predicates (eskip-json-to-clj eskip-json)) => "hello(1, \"hello\", /^.*$/) && hello1()")
+      (-> eskip-json
+          (eskip-json-to-clj)
+          (predicates))
+      => "hello(1, \"hello\", /^.*$/) && hello1()")
 
 (fact "should extract the endpoint"
-      (endpoint (eskip-json-to-clj eskip-json)) => "\n   -> \"http://www.hello.com/hello\"")
+      (-> eskip-json
+          (eskip-json-to-clj)
+          (endpoint))
+      => "\n   -> \"http://www.hello.com/hello\"")
 
 (fact "should extract the shunt endpoint"
-      (endpoint (eskip-json-to-clj eskip-json-small)) => "\n   -> <shunt>")
+      (-> eskip-json-small
+          (eskip-json-to-clj)
+          (endpoint))
+      => "\n   -> <shunt>")
 
 (fact "should extract the filters"
-      (filters (eskip-json-to-clj eskip-json)) => "filter1(1, \"hello\")\n   -> filter2()")
+      (-> eskip-json
+          (eskip-json-to-clj)
+          (filters))
+      => "filter1(1, \"hello\")\n   -> filter2()")
 
 (fact "json->eskip should parse a small map to eskip"
       (json->eskip eskip-json-small) => "hello1: *\n   -> <shunt>;")

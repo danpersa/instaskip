@@ -1,4 +1,4 @@
-(defproject org.clojars.danpersa/instaskip "0.2.4"
+(defproject org.clojars.danpersa/instaskip "0.2.5"
   :description "Transforms from eskip to json to eskip."
   :url "https://github.com/danpersa/instaskip"
   :license {:name "MIT License"
@@ -17,6 +17,6 @@
                                       [org.clojure/java.classpath "0.2.3"]
                                       [criterium "0.4.4"]
                                       [midje "1.8.3"]]}}
-  :aot :all
+  :aot [instaskip.eskip]
   :jvm-opts ^:replace ["-Dclojure.compiler.direct-linking=true"]
   )
