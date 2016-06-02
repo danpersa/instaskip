@@ -7,7 +7,8 @@
                  [instaparse             "1.4.1"]
                  [rhizome                "0.2.5"]
                  [org.clojure/data.json  "0.2.6"]
-                 [org.clojure/core.match "0.3.0-alpha4"]]
+                 [org.clojure/core.match "0.3.0-alpha4"]
+                 [clj-http               "3.1.0"]]
   :main ^:skip-aot instaskip.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}

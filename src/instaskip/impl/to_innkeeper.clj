@@ -21,16 +21,16 @@
 
   (loop [old-filters filters
          result-filters []
-         use-common-filters false]
+         uses-common-filters false]
     (if (empty? old-filters)
-      {:use-common-filters use-common-filters
-       :filters            result-filters}
+      {:uses-common-filters uses-common-filters
+       :filters             result-filters}
       (let [current-filter (first old-filters)
             current-filter-is-common-filter (contains? common-filters (current-filter :name))
             new-filters (if current-filter-is-common-filter
                           result-filters
                           (conj result-filters current-filter))
-            new-use-common-filters (or current-filter-is-common-filter use-common-filters)]
+            new-use-common-filters (or current-filter-is-common-filter uses-common-filters)]
 
         (recur (rest old-filters)
                new-filters
@@ -76,9 +76,17 @@
   "Transforms from an eskip map to an innkeeper map"
   [eskip-map]
 
-  (let [innkeeper-predicates (predicates-to-innkeeper (eskip-map :predicates))])
-
-  {:name (eskip-map :name)
-   :predicates ""}
-
-  )
+  (let [innkeeper-predicates (predicates-to-innkeeper (-> eskip-map
+                                                          :route
+                                                          :predicates
+                                                          ))
+        innkeeper-filters (filters-to-innkeeper (-> eskip-map
+                                                    :route
+                                                    :filters))]
+    {:route {:name                (eskip-map :name)
+             :route               {:predicates (innkeeper-predicates :predicates)
+                                   :filters    (innkeeper-filters :filters)
+                                   :endpoint   (get eskip-map :endpoint "")}
+             :uses-common-filters (innkeeper-filters :uses-common-filters)}
+     :path  {:uri   (innkeeper-predicates :uri)
+             :hosts (innkeeper-predicates :hosts)}}))
