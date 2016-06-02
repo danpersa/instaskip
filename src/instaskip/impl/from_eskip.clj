@@ -13,14 +13,15 @@
      predicates       = predicate (<'&&'> predicate)* | star
      predicate        = predicate-name <'('> predicate-arg? (<','> predicate-arg)* <')'>
      predicate-name   = #'[a-zA-Z0-9]*'
-     predicate-arg    = string | number | regexval
+     predicate-arg    = string-arg | number | regexval
      filter           = filter-name <'('> filter-arg? (<','> filter-arg)* <')'>
      filter-name      = #'[a-zA-Z0-9]*'
-     filter-arg       = string | number
+     filter-arg       = string-arg | number | regexval
      endpoint         = string | shunt
      shunt            = #'<shunt>'
      star             = #'\\*'
      string           = <quote> #'[^\"]*' <quote>
+     string-arg       = string
      quote            = #'\"'
      number           = decimal-number | int-number
      decimal-number   = #'[0-9]+\\.[0-9]*'
@@ -30,14 +31,11 @@
     :auto-whitespace :standard
     :output-format :hiccup))
 
-(defn- ^{:testable true} str->num
-  "Transforms a string to a number"
-  [str]
+(defn- ^{:testable true}
+  name-and-args-to-map [name & args]
 
-  (let [n (read-string str)]
-    (if (number? n) n nil)))
+  {:name name :args (vec args)})
 
-(defn- name-and-args-to-map [name & args] {:name name :args (vec args)})
 (defn- args-to-map [name & values] (vec `(~name ~(vec values))))
 
 (defn- transform-ast-to-map
@@ -46,12 +44,13 @@
 
   (insta/transform
     {:shunt          (fn [_] "")
+     :string-arg     (fn [string] {:value string :type :string})
      :string         identity
      :star           (fn [star] {:name star :args []})
      :int-number     identity
      :decimal-number identity
-     :number         str->num
-     :regexval       str
+     :number         (fn [number] {:value number :type :number})
+     :regexval       (fn [regexval] {:value (str regexval) :type :regex})
      :filter-name    identity
      :filter-arg     identity
      :filter         name-and-args-to-map
@@ -69,15 +68,25 @@
   "Transforms an eskip routes string to a json array string"
   [eskip-routes]
 
-  (json/write-str
-    (transform-ast-to-map
-      (eskip-routes-parser eskip-routes))))
+  (-> eskip-routes
+      eskip-routes-parser
+      transform-ast-to-map
+      json/write-str))
+
+(defn eskip->maps
+  "Transforms an eskip routes string to an array of maps"
+  [eskip-routes]
+
+  (-> eskip-routes
+      eskip-routes-parser
+      transform-ast-to-map))
 
 (defn single-eskip->json
   "Transforms an eskip route string to a json string"
   [eskip-routes]
 
-  (json/write-str
-    (first 
-      (transform-ast-to-map
-       (eskip-routes-parser eskip-routes)))))
+  (-> eskip-routes
+      eskip-routes-parser
+      transform-ast-to-map
+      first
+      json/write-str))

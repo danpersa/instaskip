@@ -7,8 +7,14 @@
 
 (def eskip-json
   (str "{\"name\":\"hello1\","
-       "\"predicates\":[{\"name\":\"hello\",\"args\":[1,\"hello\",\"\\/^.*$\\/\"]},{\"name\":\"hello1\",\"args\":[]}],"
-       "\"filters\":[{\"name\":\"filter1\",\"args\":[1,\"hello\"]},{\"name\":\"filter2\",\"args\":[]}],"
+       "\"predicates\":[{\"name\":\"hello\","
+         "\"args\":[{\"value\": \"1\",\"type\":\"number\"},"
+                   "{\"value\":\"hello\",\"type\":\"string\"},"
+                   "{\"value\":\"\\/^.*$\\/\",\"type\":\"regex\"}]},"
+       "{\"name\":\"hello1\",\"args\":[]}],"
+       "\"filters\":[{\"name\":\"filter1\","
+       "\"args\":[{\"value\":\"1\",\"type\":\"number\"},{\"value\":\"hello\",\"type\":\"string\"}]},"
+       "{\"name\":\"filter2\",\"args\":[]}],"
        "\"endpoint\":\"http://www.hello.com/hello\"}"))
 
 (def eskip-json-small
@@ -27,28 +33,36 @@
        "\"filters\":[],"
        "\"endpoint\":\"\"}]"))
 
+(facts "arg-to-type"
+       (fact "should transform a string arg with type to a string"
+             (arg-to-type {"value" "hello" "type" "string"}) => "\"hello\"")
+       (fact "should transform a regex arg with type to a string"
+             (arg-to-type {"value" "\\^hello$\\" "type" "regex"}) => "\\^hello$\\")
+       (fact "should transform a numeric arg with type to a string"
+             (arg-to-type {"value" "0.5" "type" "number"}) => "0.5"))
+
 (fact "should extract the predicates"
       (-> eskip-json
-          (eskip-json-to-clj)
-          (predicates))
+          eskip-json-to-clj
+          predicates)
       => "hello(1, \"hello\", /^.*$/) && hello1()")
 
 (fact "should extract the endpoint"
       (-> eskip-json
-          (eskip-json-to-clj)
-          (endpoint))
+          eskip-json-to-clj
+          endpoint)
       => "\n   -> \"http://www.hello.com/hello\"")
 
 (fact "should extract the shunt endpoint"
       (-> eskip-json-small
-          (eskip-json-to-clj)
-          (endpoint))
+          eskip-json-to-clj
+          endpoint)
       => "\n   -> <shunt>")
 
 (fact "should extract the filters"
       (-> eskip-json
-          (eskip-json-to-clj)
-          (filters))
+          eskip-json-to-clj
+          filters)
       => "filter1(1, \"hello\")\n   -> filter2()")
 
 (fact "json->eskip should parse a small map to eskip"

@@ -6,71 +6,82 @@
 
 (expose-testables instaskip.impl.from-eskip)
 
-(fact "str->num should transform a string representing an Integer to a number"
-  (str->num "4") => 4)
+(facts "name-and-args-to-map"
+       (fact "parses a name with args"
+             (name-and-args-to-map "name"
+                                   {:value "arg1" :type :string}
+                                   {:value "0.2" :type :number}) =>
+             {:name "name" :args [{:value "arg1" :type :string}
+                                  {:value "0.2" :type :number}]}))
 
-(fact "str->num should transform a string representing an Double to a number"
-  (str->num "4.5") => 4.5)
+(facts "eskip->ast-map"
+       (fact "parses a simple route"
+             (eskip->maps "hello1: pred1() && pred2(\"Hello\") -> filter1(\"hello\") -> <shunt>;") =>
+             [{:name "hello1",
+               :filters [{:name "filter1" :args [{:value "hello" :type :string}]}],
+               :predicates [{:name "pred1" :args []}
+                            {:name "pred2" :args [{:value "Hello" :type :string}] }]
+               :endpoint ""}]))
 
-(fact "eskip->json parses a match all route"
-  (eskip->json "hello1: * -> <shunt>;") =>
-    (str "[{\"name\":\"hello1\","
-         "\"predicates\":[{\"name\":\"*\",\"args\":[]}],"
-         "\"filters\":[],"
-         "\"endpoint\":\"\"}]"))
+(facts "eskip->json"
+       (fact "parses a match all route"
+             (eskip->json "hello1: * -> <shunt>;") =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"*\",\"args\":[]}],"
+                  "\"filters\":[],"
+                  "\"endpoint\":\"\"}]"))
 
-(fact "eskip->json parses a simple route"
-  (eskip->json "hello1: pred1() -> <shunt>;") =>
-    (str "[{\"name\":\"hello1\","
-         "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
-         "\"filters\":[],"
-         "\"endpoint\":\"\"}]"))
+       (fact "parses a simple route"
+             (eskip->json "hello1: pred1() -> <shunt>;") =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
+                  "\"filters\":[],"
+                  "\"endpoint\":\"\"}]"))
 
-(fact "eskip->json parses a simple route wiht an endpoint"
-      (eskip->json "hello1: pred1() -> \"http://www.hello.com/\";") =>
-      (str "[{\"name\":\"hello1\","
-           "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
-           "\"filters\":[],"
-           "\"endpoint\":\"http:\\/\\/www.hello.com\\/\"}]"))
+       (fact "parses a simple route wiht an endpoint"
+             (eskip->json "hello1: pred1() -> \"http://www.hello.com/\";") =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
+                  "\"filters\":[],"
+                  "\"endpoint\":\"http:\\/\\/www.hello.com\\/\"}]"))
 
-(fact "eskip->json parses a route with a predicate"
-  (eskip->json "hello1: pred1(\"hello\", 3, 4.2, 0, /^.*$/) -> <shunt>;") =>
-    (str "[{\"name\":\"hello1\","
-         "\"predicates\":[{\"name\":\"pred1\",\"args\":[\"hello\",3,4.2,0,\"\\/^.*$\\/\"]}],"
-         "\"filters\":[],"
-         "\"endpoint\":\"\"}]"))
+       (fact "parses a route with a predicate"
+             (eskip->json "hello1: pred1(\"hello\", 3, 4.2, 0, /^.*$/) -> <shunt>;") =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"pred1\","
+                  "\"args\":[{\"value\":\"hello\",\"type\":\"string\"},{\"value\":\"3\",\"type\":\"number\"},{\"value\":\"4.2\",\"type\":\"number\"},{\"value\":\"0\",\"type\":\"number\"},{\"value\":\"\\/^.*$\\/\",\"type\":\"regex\"}]}],"
+                  "\"filters\":[],"
+                  "\"endpoint\":\"\"}]"))
 
-(fact "eskip->json parses a route with many predicates"
-  (eskip->json "hello1: pred1(\"hello\") && pred2(2) -> <shunt>;") =>
-      (str "[{\"name\":\"hello1\","
-           "\"predicates\":[{\"name\":\"pred1\",\"args\":[\"hello\"]},{\"name\":\"pred2\",\"args\":[2]}],"
-           "\"filters\":[],"
-           "\"endpoint\":\"\"}]"))
+       (fact "parses a route with many predicates"
+             (eskip->json "hello1: pred1(\"hello\") && pred2(2) -> <shunt>;") =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"pred1\","
+                  "\"args\":[{\"value\":\"hello\",\"type\":\"string\"}]},"
+                  "{\"name\":\"pred2\",\"args\":[{\"value\":\"2\",\"type\":\"number\"}]}],"
+                  "\"filters\":[],"
+                  "\"endpoint\":\"\"}]"))
 
-(fact "eskip->json parses a route with a filter"
-  (eskip->json "hello1: pred1() -> filter1(\"hello\", 3, 4.2, 0) -> <shunt>;") =>
-    (str "[{\"name\":\"hello1\","
-         "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
-         "\"filters\":[{\"name\":\"filter1\",\"args\":[\"hello\",3,4.2,0]}],"
-         "\"endpoint\":\"\"}]"))
+       (fact "parses a route with many filters"
+             (eskip->json "hello1: pred1() -> filter1(\"hello\") -> filter2(2) -> <shunt>;") =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
+                  "\"filters\":[{\"name\":\"filter1\","
+                  "\"args\":[{\"value\":\"hello\",\"type\":\"string\"}]},"
+                  "{\"name\":\"filter2\","
+                  "\"args\":[{\"value\":\"2\",\"type\":\"number\"}]}],"
+                  "\"endpoint\":\"\"}]"))
 
-(fact "eskip->json parses a route with many filters"
-  (eskip->json "hello1: pred1() -> filter1(\"hello\") -> filter2(2) -> <shunt>;") =>
-    (str "[{\"name\":\"hello1\"," 
-         "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
-         "\"filters\":[{\"name\":\"filter1\",\"args\":[\"hello\"]},{\"name\":\"filter2\",\"args\":[2]}],"
-         "\"endpoint\":\"\"}]"))
-
-(fact "eskip->json should parse more routes"
-  (eskip->json (str "hello1: pred1(\"hello\") -> <shunt>;"
-                    "hello2: * -> \"http://hello.com\";")) =>
-      (str "[{\"name\":\"hello1\","
-           "\"predicates\":[{\"name\":\"pred1\",\"args\":[\"hello\"]}],"
-           "\"filters\":[],\"endpoint\":\"\"},"
-           "{\"name\":\"hello2\","
-           "\"predicates\":[{\"name\":\"*\",\"args\":[]}],"
-           "\"filters\":[],"
-           "\"endpoint\":\"http:\\/\\/hello.com\"}]"))
+       (fact "parses more routes"
+             (eskip->json (str "hello1: pred1() -> <shunt>;"
+                               "hello2: * -> \"http://hello.com\";")) =>
+             (str "[{\"name\":\"hello1\","
+                  "\"predicates\":[{\"name\":\"pred1\",\"args\":[]}],"
+                  "\"filters\":[],\"endpoint\":\"\"},"
+                  "{\"name\":\"hello2\","
+                  "\"predicates\":[{\"name\":\"*\",\"args\":[]}],"
+                  "\"filters\":[],"
+                  "\"endpoint\":\"http:\\/\\/hello.com\"}]")))
 
 (fact "single-eskip->json parses a simple route"
       (single-eskip->json "hello1: pred1() -> <shunt>;") =>
