@@ -8,7 +8,9 @@
                  [rhizome                "0.2.5"]
                  [org.clojure/data.json  "0.2.6"]
                  [org.clojure/core.match "0.3.0-alpha4"]
-                 [clj-http               "3.1.0"]]
+                 [clj-http               "3.1.0"]
+                 [funcool/cats           "1.2.1"]
+                 [org.clojure/tools.logging "0.3.1"]]
   :main ^:skip-aot instaskip.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
