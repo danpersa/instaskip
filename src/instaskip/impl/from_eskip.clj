@@ -2,13 +2,15 @@
   (:require [instaparse.core :as insta]
             [clojure.data.json :as json]))
 
-(def ^:private eskip-routes-parser
+(def whitespace-parser (insta/parser "whitespace = #'[\\n\\s]+'"))
+
+(def ^{:private true :testable true} eskip-routes-parser
   "returns an parser for eskip routes"
   (insta/parser
     "
      routes           = route+
      route            = name <':'> predicates <'->'> filters endpoint <';'>
-     name             = #'[a-zA-Z0-9]+'
+     name             = #'[a-zA-Z0-9_]+'
      filters          = (filter <'->'> )*
      predicates       = predicate (<'&&'> predicate)* | star
      predicate        = predicate-name <'('> predicate-arg? (<','> predicate-arg)* <')'>

@@ -72,16 +72,14 @@
                             hosts
                             uri))))))
 
-(defn- ^{:testable true} eskip-map-to-innkeeper
+(defn eskip-map-to-innkeeper
   "Transforms from an eskip map to an innkeeper map"
   [eskip-map]
 
   (let [innkeeper-predicates (predicates-to-innkeeper (-> eskip-map
-                                                          :route
                                                           :predicates
                                                           ))
         innkeeper-filters (filters-to-innkeeper (-> eskip-map
-                                                    :route
                                                     :filters))]
     {:route {:name                (eskip-map :name)
              :route               {:predicates (innkeeper-predicates :predicates)

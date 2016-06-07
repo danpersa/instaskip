@@ -42,17 +42,26 @@
                                      :hosts ["service.com" "m.service.com"]}))
 
 (defn post-path
-  "Posts a path to innkeeper. The path has host strings instead of host ids"
+  "Posts a path to innkeeper."
   [path]
-  (let [path-with-host-ids (transform-path-with-hosts-to-ids path)]
-    (innkeeper/extract-body
-      (client/post paths-url {:body         (json/write-str path-with-host-ids)
-                              :accept       :json
-                              :content-type :json
-                              :headers      {"Authorization" innkeeper/write-token}}))))
+
+  (client/post paths-url {:body         (json/write-str path)
+                          :accept       :json
+                          :content-type :json
+                          :headers      {"Authorization" innkeeper/write-token}}))
 
 (comment (post-path {:uri "/uri-22" :host_ids [1 3 4]}))
 
+(defn create-path
+  "Creates a path. The path has host strings instead of host ids.
+   Returns a map representing the path with the id."
+  [path]
+  (let [path-with-host-ids (transform-path-with-hosts-to-ids path)]
+    (innkeeper/extract-body
+      (post-path path-with-host-ids))))
+
+(comment (create-path {:uri   "/uri-123"
+                       :hosts ["service.com" "m.service.com"]}))
 
 (defmulti unwrap-try class)
 
@@ -62,7 +71,6 @@
 (defmethod unwrap-try Failure [data]
   (let [value (cats/extract data)]
     (log/error "There was an error" value)))
-
 
 (defn path-uris-to-paths []
   (->> (client/get (str paths-url) {:accept  :json

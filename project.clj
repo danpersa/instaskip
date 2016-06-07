@@ -10,7 +10,8 @@
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [clj-http               "3.1.0"]
                  [funcool/cats           "1.2.1"]
-                 [org.clojure/tools.logging "0.3.1"]]
+                 [org.clojure/tools.logging "0.3.1"]
+                 [me.raynes/fs "1.4.6"]]
   :main ^:skip-aot instaskip.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}

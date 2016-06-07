@@ -6,6 +6,16 @@
 
 (expose-testables instaskip.impl.from-eskip)
 
+(facts "eskip-routes-parser"
+       (fact "parses a simple route"
+             (eskip-routes-parser "hello1: Host(/^(m-it[.]release[.]zalando[.]net)$/) -> <shunt>;") => "")
+       (fact "parses a complex route"
+             (eskip-routes-parser
+               "aladdin_genieWishlistItemsApi: Path(\"/api/wishlist\") && Host(/^(m-it[.]release[.]zalando[.]net|m-pl[.]release[.]zalando[.]net|m-es[.]release[.]zalando[.]net|m-uk[.]release[.]zalando[.]net|www-it[.]release[.]zalando[.]net|www-pl[.]release[.]zalando[.]net|www-es[.]release[.]zalando[.]net|www-uk[.]release[.]zalando[.]net)$/)
+                  -> fashionStore()
+                  -> \"https://genie.aladdin-staging.zalan.do\";") => "")
+       )
+
 (facts "name-and-args-to-map"
        (fact "parses a name with args"
              (name-and-args-to-map "name"
@@ -17,11 +27,17 @@
 (facts "eskip->ast-map"
        (fact "parses a simple route"
              (eskip->maps "hello1: pred1() && pred2(\"Hello\") -> filter1(\"hello\") -> <shunt>;") =>
-             [{:name "hello1",
-               :filters [{:name "filter1" :args [{:value "hello" :type :string}]}],
+             [{:name       "hello1",
+               :filters    [{:name "filter1" :args [{:value "hello" :type :string}]}],
                :predicates [{:name "pred1" :args []}
-                            {:name "pred2" :args [{:value "Hello" :type :string}] }]
-               :endpoint ""}]))
+                            {:name "pred2" :args [{:value "Hello" :type :string}]}]
+               :endpoint   ""}])
+       (fact "parses a complex route"
+             (eskip->maps (str "aladdin_genieWishlistItemsApi: "
+                               "Path(\"/api/wishlist\") && "
+                               "Host(/^(m-it[.]release[.]zalando[.]net)$/)\n  "
+                               "-> fashionStore()\n  -> \"https://genie.aladdin-staging.zalan.do\";")) =>
+             []))
 
 (facts "eskip->json"
        (fact "parses a match all route"

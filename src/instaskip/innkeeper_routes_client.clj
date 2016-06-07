@@ -29,8 +29,8 @@
         current-path ((innkeeper-paths/path-uris-to-paths) (path :uri))]
     (if (nil? current-path)
       (let [current-path (innkeeper-paths/post-path path)]
-        (create-route-with-existing-path route current-path)))
-      (create-route-with-existing-path route path)
+        (create-route-with-existing-path route current-path))
+      (create-route-with-existing-path route path))
     )
   )
 

@@ -49,20 +49,19 @@
 (facts "eskip-map-to-innkeeper"
        (fact "transforms from eskip map to innkeeper map"
              (eskip-map-to-innkeeper
-               {:name                "theRoute"
-                :route               {:predicates [{:name "Host"
-                                                    :args [{:value "/^(host1.com|host2.com)$/"
-                                                            :type  :regex}]}
-                                                   {:name "Path" :args [{:value "/path/example"
-                                                                         :type  :string}]}
-                                                   {:name "Method" :args [{:value "GET"
-                                                                           :type  :string}]}]
-                                      :filters    [{:name "filter1" :args []}
-                                                   {:name "fashionStore" :args []}
-                                                   {:name "filter2" :args [{:value "value"
-                                                                            :type  :string}]}]
-                                      :endpoint   ""}
-                :uses-common-filters true}) =>
+               {:name       "theRoute"
+                :predicates [{:name "Host"
+                              :args [{:value "/^(host1.com|host2.com)$/"
+                                      :type  :regex}]}
+                             {:name "Path" :args [{:value "/path/example"
+                                                   :type  :string}]}
+                             {:name "Method" :args [{:value "GET"
+                                                     :type  :string}]}]
+                :filters    [{:name "filter1" :args []}
+                             {:name "fashionStore" :args []}
+                             {:name "filter2" :args [{:value "value"
+                                                      :type  :string}]}]
+                :endpoint   ""}) =>
 
              {:route
                     {:name                "theRoute",
@@ -76,4 +75,24 @@
                      :uses-common-filters true}
               :path {:uri   "/path/example"
                      :hosts ["host1.com" "host2.com"]
-                     }}))
+                     }})
+       (fact "transforms from eskip to innkeeper a real route"
+             (eskip-map-to-innkeeper
+               {:name       "aladdin_genieWishlistItemsApi",
+                :predicates [{:name "Path", :args [{:value "/api/wishlist", :type :string}]}
+                             {:name "Host",
+                              :args [{:value "/^(m-it[.]release[.]zalando[.]net|m-pl[.]release[.]zalando[.]net|m-es[.]release[.]zalando[.]net|m-uk[.]release[.]zalando[.]net|www-it[.]release[.]zalando[.]net|www-pl[.]release[.]zalando[.]net|www-es[.]release[.]zalando[.]net|www-uk[.]release[.]zalando[.]net)$/",
+                                      :type  :regex}]}],
+                :filters    [{:name "fashionStore", :args []}],
+                :endpoint   "https://genie.aladdin-staging.zalan.do"}) =>
+
+             {:path
+                     {:hosts ["m-it[.]release[.]zalando[.]net" "m-pl[.]release[.]zalando[.]net" "m-es[.]release[.]zalando[.]net" "m-uk[.]release[.]zalando[.]net" "www-it[.]release[.]zalando[.]net" "www-pl[.]release[.]zalando[.]net" "www-es[.]release[.]zalando[.]net" "www-uk[.]release[.]zalando[.]net"]
+                      :uri   "/api/wishlist"}
+              :route {:name                "aladdin_genieWishlistItemsApi"
+                      :route               {:predicates []
+                                            :filters    []
+                                            :endpoint   "https://genie.aladdin-staging.zalan.do"}
+                      :uses-common-filters true}}))
+
+
