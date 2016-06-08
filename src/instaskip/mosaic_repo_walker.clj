@@ -38,9 +38,11 @@
   (vec (flatten (m/alet [{team-name :team-name eskip :eskip} team-with-eskip]
                         {:team-name team-name :eskip-maps (eskip/eskip->maps eskip)}))))
 
-(def eskip-maps (:eskip-maps (first team-with-eskip-map)))
+(comment team-with-eskip-map)
 
-; eskip-maps
+
+(comment (def eskip-maps (:eskip-maps (first team-with-eskip-map))))
+
 
 (defn eskip-maps-without-regex-paths [eskip-maps]
   (filter
@@ -53,10 +55,9 @@
                                   ))) (:predicates arg)))))
     eskip-maps))
 
-; (eskip-maps-without-regex-paths eskip-maps)
+(comment (eskip-maps-without-regex-paths eskip-maps))
 
 
 (for [{team-name :team-name eskip-maps :eskip-maps} team-with-eskip-map
       eskip-map (eskip-maps-without-regex-paths eskip-maps)]
-  (do (println eskip-map)
-      (ik/eskip-map-to-innkeeper eskip-map)))
+  (ik/eskip-map-to-innkeeper eskip-map))

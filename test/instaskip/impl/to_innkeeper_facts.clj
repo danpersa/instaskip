@@ -44,7 +44,7 @@
 (facts "split-hosts"
        (fact "splits a regex string into more hosts"
              (split-hosts "/^(host1[.]com|host2[.]com|host3[.]com)$/") =>
-             ["host1[.]com" "host2[.]com" "host3[.]com"]))
+             ["host1.com" "host2.com" "host3.com"]))
 
 (facts "eskip-map-to-innkeeper"
        (fact "transforms from eskip map to innkeeper map"
@@ -81,13 +81,13 @@
                {:name       "aladdin_genieWishlistItemsApi",
                 :predicates [{:name "Path", :args [{:value "/api/wishlist", :type :string}]}
                              {:name "Host",
-                              :args [{:value "/^(m-it[.]release[.]zalando[.]net|m-pl[.]release[.]zalando[.]net|m-es[.]release[.]zalando[.]net|m-uk[.]release[.]zalando[.]net|www-it[.]release[.]zalando[.]net|www-pl[.]release[.]zalando[.]net|www-es[.]release[.]zalando[.]net|www-uk[.]release[.]zalando[.]net)$/",
+                              :args [{:value "/^(m-it[.]release[.]zalando[.]net|m-pl[.]release[.]zalando[.]net)$/",
                                       :type  :regex}]}],
                 :filters    [{:name "fashionStore", :args []}],
                 :endpoint   "https://genie.aladdin-staging.zalan.do"}) =>
 
              {:path
-                     {:hosts ["m-it[.]release[.]zalando[.]net" "m-pl[.]release[.]zalando[.]net" "m-es[.]release[.]zalando[.]net" "m-uk[.]release[.]zalando[.]net" "www-it[.]release[.]zalando[.]net" "www-pl[.]release[.]zalando[.]net" "www-es[.]release[.]zalando[.]net" "www-uk[.]release[.]zalando[.]net"]
+                     {:hosts ["m-it.release.zalando.net" "m-pl.release.zalando.net"]
                       :uri   "/api/wishlist"}
               :route {:name                "aladdin_genieWishlistItemsApi"
                       :route               {:predicates []

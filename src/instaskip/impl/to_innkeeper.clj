@@ -9,8 +9,9 @@
 
   (let [trimmed-hosts (->> hosts-string
                            (re-find (re-pattern "\\/\\^\\((.*)\\)\\$\\/"))
-                           peek)]
-    (split trimmed-hosts #"[|]")))
+                           peek)
+        hosts-with-normalized-dot (.replace trimmed-hosts "[.]" ".")]
+    (split hosts-with-normalized-dot #"[|]")))
 
 (def ^{:private true :testable true} common-filters #{"fashionStore"})
 

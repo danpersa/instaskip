@@ -8,13 +8,16 @@
 
 (facts "eskip-routes-parser"
        (fact "parses a simple route"
-             (eskip-routes-parser "hello1: Host(/^(m-it[.]release[.]zalando[.]net)$/) -> <shunt>;") => "")
-       (fact "parses a complex route"
-             (eskip-routes-parser
-               "aladdin_genieWishlistItemsApi: Path(\"/api/wishlist\") && Host(/^(m-it[.]release[.]zalando[.]net|m-pl[.]release[.]zalando[.]net|m-es[.]release[.]zalando[.]net|m-uk[.]release[.]zalando[.]net|www-it[.]release[.]zalando[.]net|www-pl[.]release[.]zalando[.]net|www-es[.]release[.]zalando[.]net|www-uk[.]release[.]zalando[.]net)$/)
-                  -> fashionStore()
-                  -> \"https://genie.aladdin-staging.zalan.do\";") => "")
-       )
+             (eskip-routes-parser "hello1: Host(/^(m-it[.]release[.]site[.]net)$/) -> <shunt>;") =>
+             [:routes
+              [:route
+               [:name "hello1"]
+               [:predicates
+                [:predicate
+                 [:predicate-name "Host"]
+                 [:predicate-arg
+                  [:regexval "/^(m-it[.]release[.]site[.]net)$/"]]]]
+               [:filters] [:endpoint [:shunt "<shunt>"]]]]))
 
 (facts "name-and-args-to-map"
        (fact "parses a name with args"
@@ -31,13 +34,7 @@
                :filters    [{:name "filter1" :args [{:value "hello" :type :string}]}],
                :predicates [{:name "pred1" :args []}
                             {:name "pred2" :args [{:value "Hello" :type :string}]}]
-               :endpoint   ""}])
-       (fact "parses a complex route"
-             (eskip->maps (str "aladdin_genieWishlistItemsApi: "
-                               "Path(\"/api/wishlist\") && "
-                               "Host(/^(m-it[.]release[.]zalando[.]net)$/)\n  "
-                               "-> fashionStore()\n  -> \"https://genie.aladdin-staging.zalan.do\";")) =>
-             []))
+               :endpoint   ""}]))
 
 (facts "eskip->json"
        (fact "parses a match all route"
