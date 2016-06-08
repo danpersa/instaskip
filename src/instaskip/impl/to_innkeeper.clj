@@ -75,7 +75,7 @@
 
 (defn eskip-map-to-innkeeper
   "Transforms from an eskip map to an innkeeper map"
-  [eskip-map]
+  [team-name eskip-map]
 
   (let [innkeeper-predicates (predicates-to-innkeeper (-> eskip-map
                                                           :predicates
@@ -87,5 +87,6 @@
                                    :filters    (innkeeper-filters :filters)
                                    :endpoint   (get eskip-map :endpoint "")}
              :uses-common-filters (innkeeper-filters :uses-common-filters)}
-     :path  {:uri   (innkeeper-predicates :uri)
-             :hosts (innkeeper-predicates :hosts)}}))
+     :path  {:uri           (innkeeper-predicates :uri)
+             :hosts         (innkeeper-predicates :hosts)
+             :owned-by-team team-name}}))

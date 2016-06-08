@@ -60,4 +60,5 @@
 
 (for [{team-name :team-name eskip-maps :eskip-maps} team-with-eskip-map
       eskip-map (eskip-maps-without-regex-paths eskip-maps)]
-  (ik/eskip-map-to-innkeeper eskip-map))
+  (ik/eskip-map-to-innkeeper team-name eskip-map))
+

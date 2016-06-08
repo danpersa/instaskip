@@ -49,6 +49,7 @@
 (facts "eskip-map-to-innkeeper"
        (fact "transforms from eskip map to innkeeper map"
              (eskip-map-to-innkeeper
+               "theTeam"
                {:name       "theRoute"
                 :predicates [{:name "Host"
                               :args [{:value "/^(host1.com|host2.com)$/"
@@ -73,11 +74,13 @@
                                                          :args [{:type :string :value "value"}]}]
                                            :endpoint   ""}
                      :uses-common-filters true}
-              :path {:uri   "/path/example"
-                     :hosts ["host1.com" "host2.com"]
+              :path {:uri           "/path/example"
+                     :hosts         ["host1.com" "host2.com"]
+                     :owned-by-team "theTeam"
                      }})
        (fact "transforms from eskip to innkeeper a real route"
              (eskip-map-to-innkeeper
+               "theTeam"
                {:name       "aladdin_genieWishlistItemsApi",
                 :predicates [{:name "Path", :args [{:value "/api/wishlist", :type :string}]}
                              {:name "Host",
@@ -87,12 +90,11 @@
                 :endpoint   "https://genie.aladdin-staging.zalan.do"}) =>
 
              {:path
-                     {:hosts ["m-it.release.zalando.net" "m-pl.release.zalando.net"]
-                      :uri   "/api/wishlist"}
+                     {:hosts         ["m-it.release.zalando.net" "m-pl.release.zalando.net"]
+                      :uri           "/api/wishlist"
+                      :owned-by-team "theTeam"}
               :route {:name                "aladdin_genieWishlistItemsApi"
                       :route               {:predicates []
                                             :filters    []
                                             :endpoint   "https://genie.aladdin-staging.zalan.do"}
                       :uses-common-filters true}}))
-
-
