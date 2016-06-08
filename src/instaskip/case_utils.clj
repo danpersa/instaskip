@@ -13,3 +13,9 @@
   [s]
 
   ((comp keyword snake-to-hyphen) s))
+
+(defn hyphen-keyword-to-snake
+  "transforms a keyword from hyphen case to snake case"
+  [s]
+
+  (string/replace (name s) #"-" "_"))

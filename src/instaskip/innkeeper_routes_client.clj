@@ -6,9 +6,16 @@
             [instaskip.innkeeper-paths-client :as innkeeper-paths]
             [clojure.tools.logging :as log]))
 
+(def ^{:private true} routes-url (str innkeeper/innkeeper-url "/routes"))
 
+(defn- post-route [route]
 
-(defn post-route [route])
+  (log/info "Create route " route)
+  (client/post routes-url {:body         (json/write-str route
+                                                         :key-fn instaskip.case-utils/hyphen-keyword-to-snake)
+                           :accept       :json
+                           :content-type :json
+                           :headers      {"Authorization" innkeeper/admin-token}}))
 
 
 (defn- create-route-with-existing-path [route path]
@@ -22,15 +29,13 @@
   The route doesn't have a path id."
   [route-with-path]
 
-  (log/info "Create route " route-with-path)
-
   (let [route (route-with-path :route)
         path (route-with-path :path)
         current-path ((innkeeper-paths/path-uris-to-paths) (path :uri))]
     (if (nil? current-path)
-      (let [current-path (innkeeper-paths/post-path path)]
+      (let [current-path (innkeeper-paths/create-path path)]
         (create-route-with-existing-path route current-path))
-      (create-route-with-existing-path route path))
+      (create-route-with-existing-path route current-path))
     )
   )
 

@@ -3,7 +3,8 @@
             [cats.core :as m]
             [cats.builtin]
             [instaskip.impl.from-eskip :as eskip]
-            [instaskip.impl.to-innkeeper :as ik]))
+            [instaskip.impl.to-innkeeper :as ik]
+            [instaskip.innkeeper-routes-client :as r]))
 
 
 (def routes-dir "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/")
@@ -47,18 +48,30 @@
 (defn eskip-maps-without-regex-paths [eskip-maps]
   (filter
     (fn [arg]
-      (not (empty?
-             (filter #(and (= (:name %) "Path")
-                           (not (.contains
-                                  (:value (first (:args %)))
-                                  "*"
-                                  ))) (:predicates arg)))))
+
+      (and (not (empty?
+                  ;; only maps with a Path predicate without a * inside
+                  (filter #(and (= (:name %) "Path")
+                                (not (.contains
+                                       (:value (first (:args %)))
+                                       "*"
+                                       ))) (:predicates arg))))
+           (not (empty?
+                  ;; only maps with a Host predicate
+                  (filter #(= (:name %) "Host") (:predicates arg))))))
     eskip-maps))
 
 (comment (eskip-maps-without-regex-paths eskip-maps))
 
 
-(for [{team-name :team-name eskip-maps :eskip-maps} team-with-eskip-map
-      eskip-map (eskip-maps-without-regex-paths eskip-maps)]
-  (ik/eskip-map-to-innkeeper team-name eskip-map))
+(def routes-with-paths (for [{team-name :team-name eskip-maps :eskip-maps} team-with-eskip-map
+                             eskip-map (eskip-maps-without-regex-paths eskip-maps)]
+                         (ik/eskip-map-to-innkeeper team-name eskip-map)))
 
+(comment routes-with-paths)
+
+(defn migrate-routes []
+  (for [route-with-path routes-with-paths]
+    (r/create-route route-with-path)))
+
+(comment (migrate-routes))

@@ -34,23 +34,27 @@
   (transform-hosts-to-ids ["service.com" "m.service.com"]))
 
 (defn- transform-path-with-hosts-to-ids [path]
-  {:uri      (path :uri)
-   :host_ids (transform-hosts-to-ids (path :hosts))})
+  {:uri           (path :uri)
+   :host-ids      (transform-hosts-to-ids (path :hosts))
+   :owned-by-team (path :owned-by-team)})
 
 (comment
-  (transform-path-with-hosts-to-ids {:uri   "/uri"
-                                     :hosts ["service.com" "m.service.com"]}))
+  (transform-path-with-hosts-to-ids {:uri           "/uri"
+                                     :hosts         ["service.com" "m.service.com"]
+                                     :owned-by-team "team-1"}))
 
-(defn post-path
+(defn- post-path
   "Posts a path to innkeeper."
   [path]
 
-  (client/post paths-url {:body         (json/write-str path)
+  (log/info "Create path: " path)
+  (client/post paths-url {:body         (json/write-str path
+                                                        :key-fn instaskip.case-utils/hyphen-keyword-to-snake)
                           :accept       :json
                           :content-type :json
-                          :headers      {"Authorization" innkeeper/write-token}}))
+                          :headers      {"Authorization" innkeeper/admin-token}}))
 
-(comment (post-path {:uri "/uri-22" :host_ids [1 3 4]}))
+(comment (post-path {:uri "/uri-22" :host-ids [1 3 4] :owned-by-team "theTeam"}))
 
 (defn create-path
   "Creates a path. The path has host strings instead of host ids.
@@ -80,6 +84,4 @@
        (into {})))
 
 (comment (path-uris-to-paths))
-;(unwrap-try (get-path 99))
-;(unwrap-try (get-path 1))
 
