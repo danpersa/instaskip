@@ -5,7 +5,7 @@
             [clojure.spec :as s]))
 
 
-(def ^{:private true} hosts-url (str innkeeper/innkeeper-url "/hosts"))
+(def hosts-url (str innkeeper/innkeeper-url "/hosts"))
 
 
 (defn- hosts-response []

@@ -13,7 +13,7 @@
   (:import [cats.monad.exception Success]
            [cats.monad.exception Failure]))
 
-(def ^{:private true} paths-url (str innkeeper/innkeeper-url "/paths"))
+(def paths-url (str innkeeper/innkeeper-url "/paths"))
 
 (defn- path-response
   "Tries to get a path from innkeeper."

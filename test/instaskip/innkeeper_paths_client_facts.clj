@@ -1,11 +1,11 @@
 (ns instaskip.innkeeper-paths-client-facts
   (:require
     [instaskip.innkeeper-paths-client :refer :all]
+    [instaskip.innkeeper-hosts-client :refer [hosts-url]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
-    [clj-http.client :as c]
-    [instaskip.json :refer [clj->json]])
-  (:use clj-http.fake))
+    [instaskip.json :refer [clj->json]]
+    [clj-http.fake :refer [with-fake-routes]]))
 
 (testable-privates instaskip.innkeeper-paths-client
                    path-with-hosts->path-with-host-ids
@@ -40,9 +40,13 @@
        (fact "creates a path"
 
              (with-fake-routes
-               {"http://localhost:8080/paths"
-                (fn [_] {:status 200 :headers {}
-                               :body   (clj->json path-mock-reponse)})}
+               {paths-url
+                (fn [_] {:status 200
+                         :body   (clj->json path-mock-reponse)})
+                hosts-url
+                (fn [_] {:status 200
+                         :body   (clj->json [{:id 1 :name "host1.com"}
+                                             {:id 2 :name "host2.com"}])})}
 
                (create-path {:uri           "/uri"
                              :hosts         ["service.com"]
