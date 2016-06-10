@@ -49,5 +49,5 @@
                                              {:id 2 :name "host2.com"}])})}
 
                (create-path {:uri           "/uri"
-                             :hosts         ["service.com"]
+                             :hosts         ["host1.com" "host2.com"]
                              :owned-by-team "team-1"})) => path-mock-reponse))

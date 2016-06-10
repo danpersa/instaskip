@@ -31,6 +31,3 @@
        (into {})))
 
 (s/instrument #'hosts-to-ids)
-
-(comment
-  (hosts-to-ids))
