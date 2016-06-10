@@ -70,8 +70,11 @@
 
 (comment routes-with-paths)
 
+(comment
+  (r/create-route (first routes-with-paths)))
+
 (defn migrate-routes []
-  (for [route-with-path routes-with-paths]
+  (for [route-with-path (rest routes-with-paths)]
     (r/create-route route-with-path)))
 
 (comment (migrate-routes))

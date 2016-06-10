@@ -15,7 +15,8 @@
                                                          :key-fn instaskip.case-utils/hyphen-keyword-to-snake)
                            :accept       :json
                            :content-type :json
-                           :headers      {"Authorization" innkeeper/admin-token}}))
+                           :headers      {"Authorization" innkeeper/admin-token}
+                           :insecure?    true}))
 
 
 (defn- create-route-with-existing-path [route path]
