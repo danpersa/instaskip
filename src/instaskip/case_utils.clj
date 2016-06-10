@@ -1,7 +1,6 @@
 (ns instaskip.case-utils
   (:require [clojure.string :as string]))
 
-
 (defn snake-to-hyphen
   "transforms a string from snake case to hyphen case"
   [s]

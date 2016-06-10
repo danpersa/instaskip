@@ -1,21 +1,19 @@
 (ns instaskip.innkeeper-routes-client
   (:require [clj-http.client :as client]
-            [clojure.data.json :as json]
-            [instaskip.case-utils :refer [snake-to-hyphen-keyword]]
-            [instaskip.innkeeper-client :as innkeeper]
-            [instaskip.innkeeper-paths-client :as innkeeper-paths]
-            [clojure.tools.logging :as log]))
+            [instaskip.innkeeper-config :as ic]
+            [instaskip.innkeeper-paths-client :as ip]
+            [clojure.tools.logging :as log]
+            [instaskip.json :as json]))
 
-(def ^{:private true} routes-url (str innkeeper/innkeeper-url "/routes"))
+(def routes-url (str ic/innkeeper-url "/routes"))
 
 (defn- post-route [route]
 
   (log/info "Create route " route)
-  (client/post routes-url {:body         (json/write-str route
-                                                         :key-fn instaskip.case-utils/hyphen-keyword-to-snake)
+  (client/post routes-url {:body         (json/clj->json route)
                            :accept       :json
                            :content-type :json
-                           :headers      {"Authorization" innkeeper/admin-token}
+                           :headers      {"Authorization" ic/admin-token}
                            :insecure?    true}))
 
 
@@ -32,9 +30,9 @@
 
   (let [route (route-with-path :route)
         path (route-with-path :path)
-        current-path ((innkeeper-paths/path-uris-to-paths) (path :uri))]
+        current-path ((ip/path-uris-to-paths) (path :uri))]
     (if (nil? current-path)
-      (let [current-path (innkeeper-paths/create-path path)]
+      (let [current-path (ip/create-path path)]
         (create-route-with-existing-path route current-path))
       (create-route-with-existing-path route current-path))
     )

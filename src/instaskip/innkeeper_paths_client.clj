@@ -1,14 +1,12 @@
 (ns instaskip.innkeeper-paths-client
   (:require [clj-http.client :as client]
-            [instaskip.case-utils :refer [snake-to-hyphen-keyword]]
             [clojure.tools.logging :as log]
-            [instaskip.innkeeper-client :as innkeeper]
-            [instaskip.innkeeper-hosts-client :as innkeeper-hosts]
+            [instaskip.innkeeper-config :as ic]
+            [instaskip.innkeeper-hosts-client :as ih]
             [clojure.spec :as s]
-            [instaskip.json :refer [clj->json]]
-            ))
+            [instaskip.json :as json]))
 
-(def paths-url (str innkeeper/innkeeper-url "/paths"))
+(def paths-url (str ic/innkeeper-url "/paths"))
 
 ; spec for innkeeper path
 (s/def :k/id integer?)
@@ -33,15 +31,15 @@
   "Calls innkeeper and returns the path with the specified id"
   [id]
 
-  (innkeeper/extract-body
+  (json/extract-body
     (client/get (str paths-url "/" id)
                 {:accept    :json
-                 :headers   {"Authorization" innkeeper/read-token}
+                 :headers   {"Authorization" ic/read-token}
                  :insecure? true})))
 (s/instrument #'get-path)
 
 (defn- transform-hosts-to-ids [hosts]
-  (let [hosts-to-ids (innkeeper-hosts/hosts-to-ids)]
+  (let [hosts-to-ids (ih/hosts-to-ids)]
     (vec (map (fn [host] (hosts-to-ids host)) hosts))))
 
 (defn- path-with-hosts->path-with-host-ids [path]
@@ -60,12 +58,12 @@
   [path]
 
   (log/info "Create path: " path)
-  (-> (client/post paths-url {:body         (clj->json path)
+  (-> (client/post paths-url {:body         (json/clj->json path)
                               :accept       :json
                               :content-type :json
-                              :headers      {"Authorization" innkeeper/admin-token}
+                              :headers      {"Authorization" ic/admin-token}
                               :insecure?    true})
-      innkeeper/extract-body))
+      json/extract-body))
 
 (s/instrument #'post-path)
 
@@ -85,8 +83,8 @@
 
 (defn path-uris-to-paths []
   (->> (client/get (str paths-url) {:accept    :json
-                                    :headers   {"Authorization" innkeeper/read-token}
+                                    :headers   {"Authorization" ic/read-token}
                                     :insecure? true})
-       innkeeper/extract-body
+       json/extract-body
        (map (fn [path] [(path :uri) path]))
        (into {})))

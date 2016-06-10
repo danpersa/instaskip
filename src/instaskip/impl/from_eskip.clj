@@ -2,8 +2,6 @@
   (:require [instaparse.core :as insta]
             [clojure.data.json :as json]))
 
-(def whitespace-parser (insta/parser "whitespace = #'[\\n\\s]+'"))
-
 (def ^{:private true :testable true} eskip-routes-parser
   "returns an parser for eskip routes"
   (insta/parser
@@ -34,7 +32,7 @@
     :output-format :hiccup))
 
 (defn- ^{:testable true}
-  name-and-args-to-map [name & args]
+name-and-args-to-map [name & args]
 
   {:name name :args (vec args)})
 

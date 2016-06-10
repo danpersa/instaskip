@@ -1,16 +1,15 @@
 (ns instaskip.innkeeper-hosts-client
   (:require [clj-http.client :as client]
-            [instaskip.case-utils :refer [snake-to-hyphen-keyword]]
-            [instaskip.innkeeper-client :as innkeeper]
-            [clojure.spec :as s]))
+            [instaskip.innkeeper-config :as ic]
+            [clojure.spec :as s]
+            [instaskip.json :as json]))
 
 
-(def hosts-url (str innkeeper/innkeeper-url "/hosts"))
-
+(def hosts-url (str ic/innkeeper-url "/hosts"))
 
 (defn- hosts-response []
 
-  (client/get hosts-url {:headers   {"Authorization" innkeeper/read-token}
+  (client/get hosts-url {:headers   {"Authorization" ic/read-token}
                          :insecure? true}))
 
 (defn- to-tuple-fn [id-to-host]
@@ -26,7 +25,7 @@
   []
 
   (->> (hosts-response)
-       innkeeper/extract-body
+       json/extract-body
        (map to-tuple-fn)
        (into {})))
 
