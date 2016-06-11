@@ -1,17 +1,29 @@
 (ns instaskip.innkeeper-client
   (:require [clj-http.client :as http]
-            [instaskip.innkeeper-config :as ic]
             [instaskip.json :as json]
             [clojure.spec :as s]
             [clojure.tools.logging :as log]))
+
+;; config related defs
+
+(def innkeeper-url "http://localhost:8080")
+(def hosts-url (str innkeeper-url "/hosts"))
+(def paths-url (str innkeeper-url "/paths"))
+(def routes-url (str innkeeper-url "/routes"))
+
+(def read-token (str "Bearer " "token-user~1-employees-route.read"))
+(def write-token (str "Bearer " "token-user~1-employees-route.write"))
+(def admin-token (str "Bearer " "token-user~1-employees-route.admin"))
+
 
 ;; host related functions
 
 (defn get-hosts []
 
-  (-> (http/get ic/hosts-url {:headers   {"Authorization" ic/read-token}
-                              :insecure? true})
+  (-> (http/get hosts-url {:headers   {"Authorization" read-token}
+                           :insecure? true})
       json/extract-body))
+
 
 ;; path related functions
 
@@ -39,9 +51,9 @@
   [id]
 
   (json/extract-body
-    (http/get (str ic/paths-url "/" id)
+    (http/get (str paths-url "/" id)
               {:accept    :json
-               :headers   {"Authorization" ic/read-token}
+               :headers   {"Authorization" read-token}
                :insecure? true})))
 
 (s/instrument #'get-path)
@@ -55,17 +67,30 @@
   [path]
 
   (log/info "Create path: " path)
-  (-> (http/post ic/paths-url {:body         (json/clj->json path)
-                               :accept       :json
-                               :content-type :json
-                               :headers      {"Authorization" ic/admin-token}
-                               :insecure?    true})
+  (-> (http/post paths-url {:body         (json/clj->json path)
+                            :accept       :json
+                            :content-type :json
+                            :headers      {"Authorization" admin-token}
+                            :insecure?    true})
       json/extract-body))
 
 (s/instrument #'post-path)
 
 (defn get-paths []
-  (-> (http/get (str ic/paths-url) {:accept    :json
-                                    :headers   {"Authorization" ic/read-token}
-                                    :insecure? true})
+  (-> (http/get (str paths-url) {:accept    :json
+                                 :headers   {"Authorization" read-token}
+                                 :insecure? true})
+      json/extract-body))
+
+
+;; route related functions
+
+(defn post-route [route]
+
+  (log/info "Create route " route)
+  (-> (http/post routes-url {:body         (json/clj->json route)
+                             :accept       :json
+                             :content-type :json
+                             :headers      {"Authorization" admin-token}
+                             :insecure?    true})
       json/extract-body))

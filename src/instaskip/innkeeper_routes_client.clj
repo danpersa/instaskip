@@ -1,27 +1,11 @@
 (ns instaskip.innkeeper-routes-client
-  (:require [clj-http.client :as http]
-            [instaskip.innkeeper-config :as ic]
-            [instaskip.innkeeper-paths-client :as ip]
-            [clojure.tools.logging :as log]
-            [instaskip.json :as json]))
-
-(def routes-url (str ic/innkeeper-url "/routes"))
-
-(defn- post-route [route]
-
-  (log/info "Create route " route)
-  (-> (http/post routes-url {:body         (json/clj->json route)
-                             :accept       :json
-                             :content-type :json
-                             :headers      {"Authorization" ic/admin-token}
-                             :insecure?    true})
-      json/extract-body))
-
+  (:require [instaskip.innkeeper-paths-client :as ip]
+            [instaskip.innkeeper-client :as ik]))
 
 (defn- create-route-with-existing-path [route path]
   (let [path-id (path :id)
         route-with-id (assoc route :path-id path-id)]
-    (post-route route-with-id)))
+    (ik/post-route route-with-id)))
 
 (defn create-route
   "Gets a map with a path and a route as a parameter.
