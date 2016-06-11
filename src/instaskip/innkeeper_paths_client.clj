@@ -19,7 +19,7 @@
 
 (s/fdef create-path
         :args (s/cat :path :k/path-with-hosts)
-        :ret :k/innkeeper-response-path)
+        :ret :ik/response-path)
 
 (defn create-path
   "Creates a path. The path has host strings instead of host ids.

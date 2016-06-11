@@ -27,24 +27,24 @@
 
 ;; path related functions
 
-(s/def :k/id integer?)
-(s/def :k/host-ids (s/* :k/id))
-(s/def :k/innkeeper-response-path (s/keys
-                                    :req-un
-                                    [:k/id
-                                     :k/uri
-                                     :k/host-ids
-                                     :k/owned-by-team
-                                     :k/created-by
-                                     :k/created-at]))
+(s/def :ik/id integer?)
+(s/def :ik/host-ids (s/* :ik/id))
+(s/def :ik/response-path (s/keys
+                           :req-un
+                           [:ik/id
+                            :ik/uri
+                            :ik/host-ids
+                            :ik/owned-by-team
+                            :ik/created-by
+                            :ik/created-at]))
 
-(s/def :k/innkeeper-request-path (s/keys
-                                   :req-un
-                                   [:k/uri
-                                    :k/host-ids
-                                    :k/owned-by-team]))
+(s/def :ik/request-path (s/keys
+                          :req-un
+                          [:ik/uri
+                           :ik/host-ids
+                           :ik/owned-by-team]))
 
-(s/fdef get-path :ret :k/innkeeper-response-path)
+(s/fdef get-path :ret :ik/response-path)
 
 (defn get-path
   "Calls innkeeper and returns the path with the specified id"
@@ -59,8 +59,8 @@
 (s/instrument #'get-path)
 
 (s/fdef post-path
-        :args (s/cat :path :k/innkeeper-request-path)
-        :ret :k/innkeeper-response-path)
+        :args (s/cat :path :ik/request-path)
+        :ret :ik/response-path)
 
 (defn post-path
   "Posts a path to innkeeper. Returns the created path."
