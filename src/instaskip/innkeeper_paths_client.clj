@@ -1,5 +1,5 @@
 (ns instaskip.innkeeper-paths-client
-  (:require [clj-http.client :as client]
+  (:require [clj-http.client :as http]
             [clojure.tools.logging :as log]
             [instaskip.innkeeper-config :as ic]
             [instaskip.innkeeper-hosts-client :as ih]
@@ -32,10 +32,10 @@
   [id]
 
   (json/extract-body
-    (client/get (str paths-url "/" id)
-                {:accept    :json
-                 :headers   {"Authorization" ic/read-token}
-                 :insecure? true})))
+    (http/get (str paths-url "/" id)
+              {:accept    :json
+               :headers   {"Authorization" ic/read-token}
+               :insecure? true})))
 (s/instrument #'get-path)
 
 (defn- transform-hosts-to-ids [hosts]
@@ -58,11 +58,11 @@
   [path]
 
   (log/info "Create path: " path)
-  (-> (client/post paths-url {:body         (json/clj->json path)
-                              :accept       :json
-                              :content-type :json
-                              :headers      {"Authorization" ic/admin-token}
-                              :insecure?    true})
+  (-> (http/post paths-url {:body         (json/clj->json path)
+                            :accept       :json
+                            :content-type :json
+                            :headers      {"Authorization" ic/admin-token}
+                            :insecure?    true})
       json/extract-body))
 
 (s/instrument #'post-path)
@@ -82,9 +82,9 @@
 (s/instrument #'create-path)
 
 (defn path-uris-to-paths []
-  (->> (client/get (str paths-url) {:accept    :json
-                                    :headers   {"Authorization" ic/read-token}
-                                    :insecure? true})
+  (->> (http/get (str paths-url) {:accept    :json
+                                  :headers   {"Authorization" ic/read-token}
+                                  :insecure? true})
        json/extract-body
        (map (fn [path] [(path :uri) path]))
        (into {})))

@@ -1,5 +1,5 @@
 (ns instaskip.innkeeper-routes-client
-  (:require [clj-http.client :as client]
+  (:require [clj-http.client :as http]
             [instaskip.innkeeper-config :as ic]
             [instaskip.innkeeper-paths-client :as ip]
             [clojure.tools.logging :as log]
@@ -10,11 +10,12 @@
 (defn- post-route [route]
 
   (log/info "Create route " route)
-  (client/post routes-url {:body         (json/clj->json route)
-                           :accept       :json
-                           :content-type :json
-                           :headers      {"Authorization" ic/admin-token}
-                           :insecure?    true}))
+  (-> (http/post routes-url {:body         (json/clj->json route)
+                             :accept       :json
+                             :content-type :json
+                             :headers      {"Authorization" ic/admin-token}
+                             :insecure?    true})
+      json/extract-body))
 
 
 (defn- create-route-with-existing-path [route path]
@@ -24,7 +25,7 @@
 
 (defn create-route
   "Gets a map with a path and a route as a parameter.
-  The path might not exist. The hosts for the route are strings instead of ids.
+  The path might not exist. The hosts for the route are strings.
   The route doesn't have a path id."
   [route-with-path]
 
@@ -40,7 +41,7 @@
 
 (comment
   (create-route {:route
-                       {:name                "theRoute",
+                       {:name                "theRoute1",
                         :route               {:predicates [{:name "Method"
                                                             :args [{:type :string :value "GET"}]}]
                                               :filters    [{:name "filter1"
@@ -49,6 +50,7 @@
                                                             :args [{:type :string :value "value"}]}]
                                               :endpoint   ""}
                         :uses-common-filters true}
-                 :path {:uri   "/path/example"
-                        :hosts ["service.com"]
+                 :path {:uri           "/path/example"
+                        :hosts         ["service.com"]
+                        :owned-by-team "theTeam"
                         }}))
