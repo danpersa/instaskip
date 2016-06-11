@@ -40,7 +40,7 @@
        (fact "creates a path"
 
              (with-fake-routes
-               {paths-url
+               {ic/paths-url
                 (fn [_] {:status 200
                          :body   (clj->json path-mock-reponse)})
                 ic/hosts-url
