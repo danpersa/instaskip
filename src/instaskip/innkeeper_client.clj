@@ -17,17 +17,23 @@
 
 
 ;; host related functions
+(s/def :ik/id integer?)
+(s/def :ik/host (s/keys
+                  :req-un
+                  [:ik/id
+                   :ik/name]))
+(s/def :ik/response-hosts (s/* :ik/host))
 
+(s/fdef get-hosts :ret :ik/response-hosts)
 (defn get-hosts []
 
   (-> (http/get hosts-url {:headers   {"Authorization" read-token}
                            :insecure? true})
       json/extract-body))
-
+(s/instrument #'get-hosts)
 
 ;; path related functions
 
-(s/def :ik/id integer?)
 (s/def :ik/host-ids (s/* :ik/id))
 (s/def :ik/response-path (s/keys
                            :req-un
