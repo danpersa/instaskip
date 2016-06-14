@@ -82,12 +82,17 @@
 
 (s/instrument #'post-path)
 
+(s/def :ik/response-paths (s/* :ik/response-path))
+
+(s/fdef get-paths :ret :ik/response-paths)
+
 (defn get-paths []
   (-> (http/get (str paths-url) {:accept    :json
                                  :headers   {"Authorization" read-token}
                                  :insecure? true})
       json/extract-body))
 
+(s/instrument #'get-paths)
 
 ;; route related functions
 

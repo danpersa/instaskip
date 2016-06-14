@@ -3,7 +3,7 @@
     [instaskip.innkeeper-paths-client :refer :all]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
-    [instaskip.json :refer [clj->json]]
+    [instaskip.json :as json]
     [clj-http.fake :refer [with-fake-routes]]
     [instaskip.innkeeper-client :as ik]))
 
@@ -42,11 +42,11 @@
              (with-fake-routes
                {ik/paths-url
                 (fn [_] {:status 200
-                         :body   (clj->json path-mock-reponse)})
+                         :body   (json/clj->json path-mock-reponse)})
                 ik/hosts-url
                 (fn [_] {:status 200
-                         :body   (clj->json [{:id 1 :name "host1.com"}
-                                             {:id 2 :name "host2.com"}])})}
+                         :body   (json/clj->json [{:id 1 :name "host1.com"}
+                                                  {:id 2 :name "host2.com"}])})}
 
                (create-path {:uri           "/uri"
                              :hosts         ["host1.com" "host2.com"]
