@@ -95,6 +95,61 @@
 (s/instrument #'get-paths)
 
 ;; route related functions
+(s/def :ik/uses-common-filters boolean?)
+(s/def :ik/path-id integer?)
+(s/def :ik-in/route (s/keys :opt-un
+                            [:ik/predicates
+                             :ik/filters
+                             :ik/endpoint]))
+
+(defn type? [x] (#{"string" "regex" "number"} x))
+
+(s/def :ik/type type?)
+
+(s/def :ik/arg (s/keys :req-un
+                       [:ik/value
+                        :ik/type]))
+
+(s/def :ik/args (s/* :ik/arg))
+
+(s/def :ik/filter-or-predicate (s/keys :req-un
+                                       [:ik/name
+                                        :ik/args]))
+
+(s/def :ik/predicates (s/* :ik/filter-or-predicate))
+(s/def :ik/filters (s/* :ik/filter-or-predicate))
+
+(s/def :ik-out/route (s/keys :req-un
+                             [:ik/predicates
+                              :ik/filters]
+                             :opt-un
+                             [:ik/endpoint]))
+
+(s/def :ik/request-route (s/keys :req-un
+                                 [:ik/name
+                                  :ik-in/route
+                                  :ik/uses-common-filters
+                                  :ik/path-id]
+                                 :opt-un
+                                 [:ik/activate-at
+                                  :ik/disable-at
+                                  :ik/description]))
+
+(s/def :ik/response-route (s/keys :req-un
+                                  [:ik/name
+                                   :ik-out/route
+                                   :ik/uses-common-filters
+                                   :ik/path-id
+                                   :ik/created-by
+                                   :ik/created-at
+                                   :ik/activate-at]
+                                  :opt-un
+                                  [:ik/description
+                                   :ik/disable-at]))
+
+(s/fdef post-route
+        :args (s/cat :route :ik/request-route)
+        :ret :ik/response-route)
 
 (defn post-route [route]
 
@@ -105,3 +160,5 @@
                              :headers      {"Authorization" admin-token}
                              :insecure?    true})
       json/extract-body))
+
+(s/instrument #'post-route)
