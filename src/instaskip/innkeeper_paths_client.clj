@@ -1,6 +1,5 @@
 (ns instaskip.innkeeper-paths-client
-  (:require [instaskip.innkeeper-hosts-client :as ih]
-            [clojure.spec :as s]
+  (:require [clojure.spec :as s]
             [instaskip.innkeeper-client :as ik]))
 
 ; specs for create-path args
@@ -9,7 +8,7 @@
 (s/def :k/path-with-hosts (s/keys :req-un [:k/uri :k/hosts :k/owned-by-team]))
 
 (defn- transform-hosts-to-ids [hosts]
-  (let [hosts-to-ids (ih/hosts-to-ids)]
+  (let [hosts-to-ids (ik/hosts-to-ids)]
     (vec (map (fn [host] (hosts-to-ids host)) hosts))))
 
 (defn- path-with-hosts->path-with-host-ids [path]

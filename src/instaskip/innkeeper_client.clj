@@ -32,6 +32,24 @@
       json/extract-body))
 (s/instrument #'get-hosts)
 
+(defn- to-tuple-fn [id-to-host]
+  [(id-to-host :name) (Integer. (id-to-host :id))])
+
+(s/def :k/hosts-to-ids (s/map-of string? integer?))
+(s/fdef hosts-to-ids
+        :ret :k/hosts-to-ids)
+
+(defn hosts-to-ids
+  "Returns map from hosts to host ids"
+  []
+
+  (->> (get-hosts)
+       (map to-tuple-fn)
+       (into {})))
+
+(s/instrument #'hosts-to-ids)
+
+
 ;; path related functions
 
 (s/def :ik/host-ids (s/* :ik/id))

@@ -27,7 +27,7 @@
 
       (transform-hosts-to-ids ["service"]) => [1]
       (provided
-        (#'instaskip.innkeeper-hosts-client/hosts-to-ids) => {"service" 1}))
+        (#'instaskip.innkeeper-client/hosts-to-ids) => {"service" 1}))
 
 (def path-mock-reponse {:id            1
                         :host-ids      [1 2]

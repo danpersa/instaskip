@@ -21,6 +21,18 @@
                (get-hosts) => [{:id 1 :name "host1.com"}
                                {:id 2 :name "host2.com"}])))
 
+(facts "hosts-to-ids"
+       (fact "returns a map from hosts to ids"
+
+             (with-fake-routes
+               {ik/hosts-url
+                (fn [_] {:status 200
+                         :body   (json/clj->json [{:id 1 :name "host1.com"}
+                                                  {:id 2 :name "host2.com"}])})}
+
+               (hosts-to-ids) => {"host1.com" 1
+                                  "host2.com" 2})))
+
 (def path-mock-response {:id            1
                          :host-ids      [1 2]
                          :owned-by-team "theteam"
