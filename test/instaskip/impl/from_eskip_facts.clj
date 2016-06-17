@@ -22,18 +22,18 @@
 (facts "name-and-args-to-map"
        (fact "parses a name with args"
              (name-and-args-to-map "name"
-                                   {:value "arg1" :type :string}
-                                   {:value "0.2" :type :number}) =>
-             {:name "name" :args [{:value "arg1" :type :string}
-                                  {:value "0.2" :type :number}]}))
+                                   {:value "arg1" :type "string"}
+                                   {:value "0.2" :type "number"}) =>
+             {:name "name" :args [{:value "arg1" :type "string"}
+                                  {:value "0.2" :type "number"}]}))
 
 (facts "eskip->ast-map"
        (fact "parses a simple route"
              (eskip->maps "hello1: pred1() && pred2(\"Hello\") -> filter1(\"hello\") -> <shunt>;") =>
              [{:name       "hello1",
-               :filters    [{:name "filter1" :args [{:value "hello" :type :string}]}],
+               :filters    [{:name "filter1" :args [{:value "hello" :type "string"}]}],
                :predicates [{:name "pred1" :args []}
-                            {:name "pred2" :args [{:value "Hello" :type :string}]}]
+                            {:name "pred2" :args [{:value "Hello" :type "string"}]}]
                :endpoint   ""}]))
 
 (facts "eskip->json"

@@ -27,11 +27,11 @@
   (create-route {:route
                        {:name                "theRoute1",
                         :route               {:predicates [{:name "Method"
-                                                            :args [{:type :string :value "GET"}]}]
+                                                            :args [{:type "string" :value "GET"}]}]
                                               :filters    [{:name "filter1"
                                                             :args []}
                                                            {:name "filter2"
-                                                            :args [{:type :string :value "value"}]}]
+                                                            :args [{:type "string" :value "value"}]}]
                                               :endpoint   ""}
                         :uses-common-filters true}
                  :path {:uri           "/path/example"

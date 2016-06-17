@@ -1,7 +1,8 @@
 (ns instaskip.impl.to-innkeeper
   (:require [instaskip.impl.from-eskip :as from-eskip :only [eskip->map]]
             [clojure.core.match :refer [match]]
-            [clojure.string :refer [split]]))
+            [clojure.string :refer [split]]
+            [clojure.spec :as s]))
 
 (defn- ^{:testable true} split-hosts
   "Splits a regex of hosts into an array of hosts."
@@ -58,35 +59,61 @@
         (match [current-predicate]
                [{:name "Host" :args
                        [{:value value
-                         :type  :regex}]}] (recur (rest old-predicates)
-                                                  result-predicates
-                                                  (split-hosts value)
-                                                  uri)
+                         :type  "regex"}]}] (recur (rest old-predicates)
+                                                   result-predicates
+                                                   (split-hosts value)
+                                                   uri)
                [{:name "Path" :args
                        [{:value value
-                         :type  :string}]}] (recur (rest old-predicates)
-                                                   result-predicates
-                                                   hosts
-                                                   value)
+                         :type  "string"}]}] (recur (rest old-predicates)
+                                                    result-predicates
+                                                    hosts
+                                                    value)
                :else (recur (rest old-predicates)
                             (conj result-predicates current-predicate)
                             hosts
                             uri))))))
+
+(s/def :ti/eskip-map (s/keys :req-un
+                             [:ik/name
+                              :ik/predicates
+                              :ik/filters
+                              :ik/endpoint]))
+
+(s/def :ti/route (s/keys :req-un [:ik/name
+                                  :ik/predicates
+                                  :ik/filters
+                                  :ik/endpoint
+                                  :ik/uses-common-filters]))
+
+(s/def :ti/host string?)
+
+; make sure we have at least one host
+(s/def :ti/hosts (s/+ :ti/host))
+
+(s/def :ti/path (s/keys :req-un [:ik/uri :ik/owned-by-team :ti/hosts]))
+
+(s/def :ti/route-with-path (s/keys :req-un [:ti/route :ti/path]))
+
+(s/fdef eskip-map-to-innkeeper
+        :args (s/cat :team-name string? :eskip-map :ti/eskip-map)
+        :ret :ti/route-with-path)
 
 (defn eskip-map-to-innkeeper
   "Transforms from an eskip map to an innkeeper map"
   [team-name eskip-map]
 
   (let [innkeeper-predicates (predicates-to-innkeeper (-> eskip-map
-                                                          :predicates
-                                                          ))
+                                                          :predicates))
         innkeeper-filters (filters-to-innkeeper (-> eskip-map
                                                     :filters))]
     {:route {:name                (eskip-map :name)
-             :route               {:predicates (innkeeper-predicates :predicates)
-                                   :filters    (innkeeper-filters :filters)
-                                   :endpoint   (get eskip-map :endpoint "")}
+             :predicates          (innkeeper-predicates :predicates)
+             :filters             (innkeeper-filters :filters)
+             :endpoint            (get eskip-map :endpoint "")
              :uses-common-filters (innkeeper-filters :uses-common-filters)}
      :path  {:uri           (innkeeper-predicates :uri)
              :hosts         (innkeeper-predicates :hosts)
              :owned-by-team team-name}}))
+
+(s/instrument #'eskip-map-to-innkeeper)

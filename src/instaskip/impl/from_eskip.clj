@@ -44,13 +44,13 @@ name-and-args-to-map [name & args]
 
   (insta/transform
     {:shunt          (fn [_] "")
-     :string-arg     (fn [string] {:value string :type :string})
+     :string-arg     (fn [string] {:value string :type "string"})
      :string         identity
      :star           (fn [star] {:name star :args []})
      :int-number     identity
      :decimal-number identity
-     :number         (fn [number] {:value number :type :number})
-     :regexval       (fn [regexval] {:value (str regexval) :type :regex})
+     :number         (fn [number] {:value number :type "number"})
+     :regexval       (fn [regexval] {:value (str regexval) :type "regex"})
      :filter-name    identity
      :filter-arg     identity
      :filter         name-and-args-to-map

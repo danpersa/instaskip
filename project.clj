@@ -12,13 +12,14 @@
                  [funcool/cats              "1.2.1"]
                  [org.clojure/tools.logging "0.3.1"]
                  [me.raynes/fs              "1.4.6"]
-]
+                 [org.clojure/tools.cli     "0.3.5"]
+                 [defun                     "0.3.0-alapha"]]
   :main ^:skip-aot instaskip.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
              :dev     {:source-paths ["dev"]
                        :repl-options {:init-ns instaskip.eskip}
-                       :plugins      [[lein-midje "3.2"]]
+                       :plugins      [[lein-midje                  "3.2"]]
                        :dependencies [[org.clojure/tools.namespace "0.2.11"]
                                       [org.clojure/java.classpath  "0.2.3"]
                                       [criterium                   "0.4.4"]

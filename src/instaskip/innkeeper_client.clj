@@ -6,7 +6,7 @@
 
 ;; config related defs
 
-(def innkeeper-url "http://localhost:8080")
+(def innkeeper-url "http://localhost:9080")
 (def hosts-url (str innkeeper-url "/hosts"))
 (def paths-url (str innkeeper-url "/paths"))
 (def routes-url (str innkeeper-url "/routes"))
