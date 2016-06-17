@@ -3,7 +3,7 @@
             [cats.core :as m]
             [cats.builtin]
             [instaskip.impl.from-eskip :as eskip]
-            [instaskip.impl.to-innkeeper :as ik]
+            [instaskip.impl.eskip-map-process :as ik]
             [instaskip.innkeeper-routes-client :as r]
             [defun :refer [fun]]
             [clojure.spec :as s]
@@ -100,7 +100,7 @@
   [teams-with-eskip-maps]
   (->> teams-with-eskip-maps
        (map (fun [{:team team :eskip-map eskip-map}]
-                 (ik/eskip-map-to-innkeeper team eskip-map)))))
+                 (ik/eskip-map->route-with-path team eskip-map)))))
 
 
 (comment

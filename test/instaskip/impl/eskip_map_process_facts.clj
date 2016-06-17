@@ -1,10 +1,10 @@
-(ns instaskip.impl.to-innkeeper-facts
+(ns instaskip.impl.eskip-map-process-facts
   (:require
-    [instaskip.impl.to-innkeeper :refer :all]
+    [instaskip.impl.eskip-map-process :refer :all]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]))
 
-(testable-privates instaskip.impl.to-innkeeper
+(testable-privates instaskip.impl.eskip-map-process
                    predicates-to-innkeeper
                    filters-to-innkeeper
                    split-hosts)
@@ -48,9 +48,9 @@
              (split-hosts "/^(host1[.]com|host2[.]com|host3[.]com)$/") =>
              ["host1.com" "host2.com" "host3.com"]))
 
-(facts "eskip-map-to-innkeeper"
+(facts "eskip-map->route-with-path"
        (fact "transforms from eskip map to innkeeper map"
-             (eskip-map-to-innkeeper
+             (eskip-map->route-with-path
                "theTeam"
                {:name       "theRoute"
                 :predicates [{:name "Host"
@@ -81,7 +81,7 @@
                      :owned-by-team "theTeam"}})
 
        (fact "transforms from eskip to innkeeper a real route"
-             (eskip-map-to-innkeeper
+             (eskip-map->route-with-path
                "theTeam"
                {:name       "aladdin_genieWishlistItemsApi",
                 :predicates [{:name "Path", :args [{:value "/api/wishlist", :type "string"}]}

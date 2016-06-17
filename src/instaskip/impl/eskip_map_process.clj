@@ -1,4 +1,4 @@
-(ns instaskip.impl.to-innkeeper
+(ns instaskip.impl.eskip-map-process
   (:require [instaskip.impl.from-eskip :as from-eskip :only [eskip->map]]
             [clojure.core.match :refer [match]]
             [clojure.string :refer [split]]
@@ -95,11 +95,11 @@
 
 (s/def :ti/route-with-path (s/keys :req-un [:ti/route :ti/path]))
 
-(s/fdef eskip-map-to-innkeeper
+(s/fdef eskip-map->route-with-path
         :args (s/cat :team-name string? :eskip-map :ti/eskip-map)
         :ret :ti/route-with-path)
 
-(defn eskip-map-to-innkeeper
+(defn eskip-map->route-with-path
   "Transforms from an eskip map to an innkeeper map"
   [team-name eskip-map]
 
@@ -116,4 +116,4 @@
              :hosts         (innkeeper-predicates :hosts)
              :owned-by-team team-name}}))
 
-(s/instrument #'eskip-map-to-innkeeper)
+(s/instrument #'eskip-map->route-with-path)
