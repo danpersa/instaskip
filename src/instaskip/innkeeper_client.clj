@@ -2,19 +2,23 @@
   (:require [clj-http.client :as http]
             [instaskip.json :as json]
             [clojure.spec :as s]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [defun :refer [defun]]))
 
 ;; config related defs
+(defn hosts-url [innkeeper-url] (str innkeeper-url "/hosts"))
+(defn paths-url [innkeeper-url] (str innkeeper-url "/paths"))
+(defn routes-url [innkeeper-url] (str innkeeper-url "/routes"))
 
-(def innkeeper-url "http://localhost:9080")
-(def hosts-url (str innkeeper-url "/hosts"))
-(def paths-url (str innkeeper-url "/paths"))
-(def routes-url (str innkeeper-url "/routes"))
+(defn- build-token-header [token] (str "Bearer " token))
 
-(def read-token (str "Bearer " "token-user~1-employees-route.read"))
-(def write-token (str "Bearer " "token-user~1-employees-route.write"))
-(def admin-token (str "Bearer " "token-user~1-employees-route.admin"))
+(def read-token (build-token-header "token-user~1-employees-route.read"))
+(def write-token (build-token-header "token-user~1-employees-route.write"))
+(def admin-token (build-token-header "token-user~1-employees-route.admin"))
 
+(s/def :ik/config (s/keys :req-un
+                          [:ik/innkeeper-url
+                           :ik/oauth-token]))
 
 ;; host related functions
 (s/def :ik/id integer?)
@@ -24,12 +28,16 @@
                    :ik/name]))
 (s/def :ik/response-hosts (s/* :ik/host))
 
-(s/fdef get-hosts :ret :ik/response-hosts)
-(defn get-hosts []
+(s/fdef get-hosts :args (s/cat :config :ik/config)
+        :ret :ik/response-hosts)
 
-  (-> (http/get hosts-url {:headers   {"Authorization" read-token}
-                           :insecure? true})
+(defn get-hosts [{:keys [innkeeper-url oauth-token]}]
+
+  (-> (http/get (hosts-url innkeeper-url)
+                {:headers   {"Authorization" (build-token-header oauth-token)}
+                 :insecure? true})
       json/extract-body))
+
 (s/instrument #'get-hosts)
 
 (defn- to-tuple-fn [id-to-host]
@@ -37,13 +45,14 @@
 
 (s/def :k/hosts-to-ids (s/map-of string? integer?))
 (s/fdef hosts-to-ids
+        :args (s/cat :config :ik/config)
         :ret :k/hosts-to-ids)
 
 (defn hosts-to-ids
   "Returns map from hosts to host ids"
-  []
+  [config]
 
-  (->> (get-hosts)
+  (->> (get-hosts config)
        (map to-tuple-fn)
        (into {})))
 
@@ -68,49 +77,63 @@
                            :ik/host-ids
                            :ik/owned-by-team]))
 
-(s/fdef get-path :ret :ik/response-path)
+(s/fdef get-path
+        :args (s/cat :id :ik/id :config :ik/config)
+        :ret :ik/response-path)
 
 (defn get-path
   "Calls innkeeper and returns the path with the specified id"
-  [id]
+  [id {:keys [innkeeper-url oauth-token]}]
 
   (json/extract-body
-    (http/get (str paths-url "/" id)
+    (http/get (str (paths-url innkeeper-url) "/" id)
               {:accept    :json
-               :headers   {"Authorization" read-token}
+               :headers   {"Authorization" (build-token-header oauth-token)}
                :insecure? true})))
 
 (s/instrument #'get-path)
 
 (s/fdef post-path
-        :args (s/cat :path :ik/request-path)
+        :args (s/cat :path :ik/request-path :config :ik/config)
         :ret :ik/response-path)
 
 (defn post-path
   "Posts a path to innkeeper. Returns the created path."
-  [path]
+  [path {:keys [innkeeper-url oauth-token]}]
 
   (log/info "Create path: " path)
-  (-> (http/post paths-url {:body         (json/clj->json path)
-                            :accept       :json
-                            :content-type :json
-                            :headers      {"Authorization" admin-token}
-                            :insecure?    true})
+  (-> (http/post (paths-url innkeeper-url) {:body         (json/clj->json path)
+                                            :accept       :json
+                                            :content-type :json
+                                            :headers      {"Authorization"
+                                                           (build-token-header oauth-token)}
+                                            :insecure?    true})
       json/extract-body))
 
 (s/instrument #'post-path)
 
 (s/def :ik/response-paths (s/* :ik/response-path))
 
-(s/fdef get-paths :ret :ik/response-paths)
+(s/fdef get-paths :args (s/cat :config :ik/config)
+        :ret :ik/response-paths)
 
-(defn get-paths []
-  (-> (http/get (str paths-url) {:accept    :json
-                                 :headers   {"Authorization" read-token}
-                                 :insecure? true})
+(defn get-paths [{:keys [innkeeper-url oauth-token]}]
+  (-> (http/get (paths-url innkeeper-url) {:accept    :json
+                                           :headers   {"Authorization"
+                                                       (build-token-header oauth-token)}
+                                           :insecure? true})
       json/extract-body))
 
 (s/instrument #'get-paths)
+
+(defn path-uris-to-paths
+  "Returns a map from path uris to paths"
+
+  [config]
+  (->> (get-paths config)
+       (map (fn [path] [(path :uri) path]))
+       (into {})))
+
 
 ;; route related functions
 (s/def :ik/uses-common-filters boolean?)
@@ -166,17 +189,17 @@
                                    :ik/disable-at]))
 
 (s/fdef post-route
-        :args (s/cat :route :ik/request-route)
+        :args (s/cat :route :ik/request-route :config :ik/config)
         :ret :ik/response-route)
 
-(defn post-route [route]
+(defn post-route [route {:keys [innkeeper-url oauth-token]}]
 
   (log/info "Create route " route)
-  (-> (http/post routes-url {:body         (json/clj->json route)
-                             :accept       :json
-                             :content-type :json
-                             :headers      {"Authorization" admin-token}
-                             :insecure?    true})
+  (-> (http/post (routes-url innkeeper-url) {:body         (json/clj->json route)
+                                             :accept       :json
+                                             :content-type :json
+                                             :headers      {"Authorization" oauth-token}
+                                             :insecure?    true})
       json/extract-body))
 
 (s/instrument #'post-route)

@@ -10,7 +10,8 @@
                    path-without-star-predicate?
                    host-predicate?
                    filter-teams-with-eskip-maps
-                   routes-with-paths)
+                   routes-with-paths
+                   has-element?)
 
 (facts "team-names-in-dir"
        (fact "returns the teams"
@@ -86,6 +87,12 @@
                                         :eskip-map eskip-map-2}
                                        {:team      "team-2"
                                         :eskip-map eskip-map-3}]))
+
+(facts "has-element?"
+       (fact "return true if the collection has an element for which the predicate returns true"
+             (has-element? [1 2 3] odd?) => true
+             (has-element? [2 4 6] odd?) => false))
+
 (facts "path-without-star-predicate"
        (fact "accepts a Path eskip predicate"
              (path-without-star-predicate? {:name "Path" :args [{:value "/hello"}]}) => true)
@@ -114,7 +121,11 @@
                                             {:team      "team3"
                                              ; missing Host predicate
                                              :eskip-map {:predicates
-                                                         [{:name "Path" :args [{:value "/hello_*"}]}]}}]) =>
+                                                         [{:name "Path" :args [{:value "/hello_*"}]}]}}
+                                            {:team      "jarvis"
+                                             :eskip-map {:predicates [{:name "Path"
+                                                                       :args [{:value "/hello"
+                                                                               :type  "string"}]}]}}]) =>
              [{:team      "team1"
                :eskip-map {:predicates
                            [{:name "Host"}
