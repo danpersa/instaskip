@@ -33,6 +33,12 @@ FIXME: explanation
 
 Running the tests: `lein midje`
 
+Running it from lein:
+
+    $ lein run -- --token="token-user~1-employees-route.admin" \
+        migrate-routes \
+        --dir="/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
+
 ## Options
 
 FIXME: listing of options this app accepts.

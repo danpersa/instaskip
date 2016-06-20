@@ -91,13 +91,6 @@
                            :owned-by-team "team-1"}
                           innkeeper-admin-config)) => path-mock-response))
 
-(def eskip-json-route {:predicates [{:name "pred"
-                                     :args [{:value "value1"
-                                             :type  "string"}]}]
-                       :filters    [{:name "pred"
-                                     :args [{:value "value1"
-                                             :type  "string"}]}]})
-
 (def route-mock-response {:id                  1
                           :name                "theroute"
                           :path-id             1
@@ -106,7 +99,12 @@
                           :created-at          "2016"
                           :activate-at         "2016"
                           :description         "some desc"
-                          :route               eskip-json-route})
+                          :predicates          [{:name "pred"
+                                                 :args [{:value "value1"
+                                                         :type  "string"}]}]
+                          :filters             [{:name "pred"
+                                                 :args [{:value "value1"
+                                                         :type  "string"}]}]})
 
 
 (facts "post-route"
@@ -118,7 +116,12 @@
                          :body   (json/clj->json route-mock-response)})}
 
                (post-route {:name                "theroute"
-                            :route               eskip-json-route
+                            :predicates          [{:name "pred"
+                                                   :args [{:value "value1"
+                                                           :type  "string"}]}]
+                            :filters             [{:name "pred"
+                                                   :args [{:value "value1"
+                                                           :type  "string"}]}]
                             :uses-common-filters true
                             :path-id             1
                             :activate-at         "2016"

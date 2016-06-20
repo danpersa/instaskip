@@ -129,7 +129,7 @@
       (match route-with-path
              {:route route :path path} (let [p (ik/post-path path innkeeper-config)
                                              r (assoc route :path-id (p :id))]
-                                         ik/post-route r)
+                                         (ik/post-route r innkeeper-config))
              {:route route} (ik/post-route route innkeeper-config)))
     ))
 

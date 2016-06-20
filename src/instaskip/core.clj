@@ -3,6 +3,7 @@
             [clojure.core.match :refer [match]]
             [clojure.tools.logging :as log]
             [clojure.string :as string]
+            [instaskip.migrate :as migrate]
             [defun :refer [defun]])
   (:gen-class :main true))
 
@@ -34,7 +35,12 @@
        (string/join \newline)))
 
 (defn- migrate-routes [dir url token]
-  (println "Migrate routes. Eskip dir: " dir " Under construction."))
+  (do (println "Migrate routes. Eskip dir: " dir
+               "\nInnkeeper url: " url
+               "\nOAuth token: " token)
+
+      (migrate/routes dir {:innkeeper-url url
+                           :oauth-token   token})))
 
 (defn- validate-migrate-routes [opts url token]
   (match opts
@@ -64,15 +70,12 @@
            {:options {:url url :token token}} (parse-action opts url token)
            :else (exit 1 "Invalid options"))))
 
-
-;(parse-opts ["--token=\"ttt\"" "list-paths"] cli-options :in-order false)
-
-
 (comment (-main "-h")
          (-main "--token" "token" "invalid")
          (-main "--token" "token" "list-paths")
          (-main "--token" "token" "list-routes")
          (-main "--token" "token" "migrate-routes")
-         (-main "--token" "token" "migrate-routes" "-d" "/eskip-routes"))
-;(-main "list-paths --token=\"ttt\"")
-;(-main "list-paths --url=http://localhost:8080/ --token=token-user~1-employees-route.write")
+         (-main "--token" "token" "migrate-routes" "-d" "/eskip-routes")
+         (-main "--token" "token" "migrate-routes"
+                "-d" "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
+                "-t" "token-user~1-employees-route.admin"))

@@ -102,12 +102,13 @@
   [path {:keys [innkeeper-url oauth-token]}]
 
   (log/info "Create path: " path)
-  (-> (http/post (paths-url innkeeper-url) {:body         (json/clj->json path)
-                                            :accept       :json
-                                            :content-type :json
-                                            :headers      {"Authorization"
-                                                           (build-token-header oauth-token)}
-                                            :insecure?    true})
+  (-> (http/post (paths-url innkeeper-url)
+                 {:body         (json/clj->json path)
+                  :accept       :json
+                  :content-type :json
+                  :headers      {"Authorization"
+                                 (build-token-header oauth-token)}
+                  :insecure?    true})
       json/extract-body))
 
 (s/instrument #'post-path)
@@ -118,10 +119,11 @@
         :ret :ik/response-paths)
 
 (defn get-paths [{:keys [innkeeper-url oauth-token]}]
-  (-> (http/get (paths-url innkeeper-url) {:accept    :json
-                                           :headers   {"Authorization"
-                                                       (build-token-header oauth-token)}
-                                           :insecure? true})
+  (-> (http/get (paths-url innkeeper-url)
+                {:accept    :json
+                 :headers   {"Authorization"
+                             (build-token-header oauth-token)}
+                 :insecure? true})
       json/extract-body))
 
 (s/instrument #'get-paths)
@@ -160,25 +162,23 @@
 (s/def :ik/predicates (s/* :ik/filter-or-predicate))
 (s/def :ik/filters (s/* :ik/filter-or-predicate))
 
-(s/def :ik-out/route (s/keys :req-un
-                             [:ik/predicates
-                              :ik/filters]
-                             :opt-un
-                             [:ik/endpoint]))
 
 (s/def :ik/request-route (s/keys :req-un
                                  [:ik/name
-                                  :ik-in/route
                                   :ik/uses-common-filters
                                   :ik/path-id]
                                  :opt-un
                                  [:ik/activate-at
                                   :ik/disable-at
-                                  :ik/description]))
+                                  :ik/description
+                                  :ik/predicates
+                                  :ik/filters
+                                  :ik/endpoint]))
 
 (s/def :ik/response-route (s/keys :req-un
                                   [:ik/name
-                                   :ik-out/route
+                                   :ik/predicates
+                                   :ik/filters
                                    :ik/uses-common-filters
                                    :ik/path-id
                                    :ik/created-by
@@ -186,7 +186,8 @@
                                    :ik/activate-at]
                                   :opt-un
                                   [:ik/description
-                                   :ik/disable-at]))
+                                   :ik/disable-at
+                                   :ik/endpoint]))
 
 (s/fdef post-route
         :args (s/cat :route :ik/request-route :config :ik/config)
@@ -195,11 +196,12 @@
 (defn post-route [route {:keys [innkeeper-url oauth-token]}]
 
   (log/info "Create route " route)
-  (-> (http/post (routes-url innkeeper-url) {:body         (json/clj->json route)
-                                             :accept       :json
-                                             :content-type :json
-                                             :headers      {"Authorization" oauth-token}
-                                             :insecure?    true})
+  (-> (http/post (routes-url innkeeper-url)
+                 {:body         (json/clj->json route)
+                  :accept       :json
+                  :content-type :json
+                  :headers      {"Authorization" (build-token-header oauth-token)}
+                  :insecure?    true})
       json/extract-body))
 
 (s/instrument #'post-route)
