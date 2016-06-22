@@ -101,7 +101,7 @@
   "Posts a path to innkeeper. Returns the created path."
   [path {:keys [innkeeper-url oauth-token]}]
 
-  (log/info "Create path: " path)
+  (log/debug "Create path: " path)
   (-> (http/post (paths-url innkeeper-url)
                  {:body         (json/clj->json path)
                   :accept       :json
@@ -195,7 +195,7 @@
 
 (defn post-route [route {:keys [innkeeper-url oauth-token]}]
 
-  (log/info "Create route " route)
+  (log/debug "Create route " route)
   (-> (http/post (routes-url innkeeper-url)
                  {:body         (json/clj->json route)
                   :accept       :json

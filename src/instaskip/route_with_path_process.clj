@@ -19,9 +19,5 @@
 
   [innkeeper-config {:keys [route path]}]
 
-  (let [path-uri (path :uri)
-        existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
-    (if (not (nil? existing-path))
-      {:route (assoc route :path-id (existing-path :id))}
-      {:route route
-       :path  (path-with-hosts->path-with-host-ids path innkeeper-config)})))
+  {:route route
+   :path  (path-with-hosts->path-with-host-ids path innkeeper-config)})

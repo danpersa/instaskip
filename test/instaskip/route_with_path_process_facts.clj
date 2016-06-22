@@ -51,15 +51,7 @@
                              :owned-by-team "theTeam"}})
 
 (facts "route-with-path->innkeeper-route-with-path"
-       (fact "transforms a route-with-path with an existing path to an innkeeper-route-with-path"
-
-             (route-with-path->innkeeper-route-with-path innkeeper-config route-with-path) =>
-             {:route (assoc (route-with-path :route) :path-id 3)}
-
-             (provided
-               (#'instaskip.innkeeper-client/path-uris-to-paths innkeeper-config) => {"/path/example" {:id 3}}))
-
-       (fact "transforms a route-with-path with a non existing path to an innkeeper-route-with-path"
+       (fact "transforms a route-with-path to an innkeeper-route-with-path"
 
              (route-with-path->innkeeper-route-with-path innkeeper-config route-with-path) =>
              {:route (route-with-path :route)
@@ -68,7 +60,6 @@
                       :owned-by-team "theTeam"}}
 
              (provided
-               (#'instaskip.innkeeper-client/path-uris-to-paths innkeeper-config) => {}
                (#'instaskip.route-with-path-process/transform-hosts-to-ids
                  ["host1.com" "host2.com"]
                  innkeeper-config) => [1 2])))

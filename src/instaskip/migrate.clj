@@ -118,20 +118,23 @@
 
   [routes-dir innkeeper-config]
 
-  (let [team-names (team-names-in-dir routes-dir)
-        teams-with-eskip (teams-with-eskip team-names routes-dir)
-        teams-with-eskip-maps (teams-with-eskip-maps teams-with-eskip)
-        filtered-teams-with-eskip-maps (filter-teams-with-eskip-maps teams-with-eskip-maps)
-        routes-with-paths (routes-with-paths filtered-teams-with-eskip-maps)
-        innkeeper-routes-with-paths (innkeeper-routes-with-paths routes-with-paths innkeeper-config)
-        ]
+  (let [innkeeper-routes-with-paths (-> routes-dir
+                                        team-names-in-dir
+                                        (teams-with-eskip routes-dir)
+                                        teams-with-eskip-maps
+                                        filter-teams-with-eskip-maps
+                                        routes-with-paths
+                                        (innkeeper-routes-with-paths innkeeper-config))]
     (for [route-with-path innkeeper-routes-with-paths]
-      (match route-with-path
-             {:route route :path path} (let [p (ik/post-path path innkeeper-config)
-                                             r (assoc route :path-id (p :id))]
-                                         (ik/post-route r innkeeper-config))
-             {:route route} (ik/post-route route innkeeper-config)))
-    ))
+      (let [{:keys [route path]} route-with-path
+            path-uri (path :uri)
+            existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
+        (if (not (nil? existing-path))
+          (let [innkeeper-route (assoc route :path-id (existing-path :id))]
+            (ik/post-route innkeeper-route innkeeper-config))
+          (let [innkeeper-path (ik/post-path path innkeeper-config)
+                innkeeper-route (assoc route :path-id (innkeeper-path :id))]
+            (ik/post-route innkeeper-route innkeeper-config)))))))
 
 (comment (routes "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
                  {:innkeeper-url "http://localhost:9080"
