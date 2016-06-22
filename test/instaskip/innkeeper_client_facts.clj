@@ -147,3 +147,21 @@
                             :description         "some desc"}
                            innkeeper-admin-config))
              => route-mock-response))
+
+(facts "get-route"
+       (fact "gets the route with the specified id"
+             (with-fake-routes
+               {(str (ik/routes-url innkeeper-url) "/" 1)
+                (fn [_] {:status 200
+                         :body   (json/clj->json route-mock-response)})}
+
+               (get-route 1 innkeeper-admin-config))))
+
+(facts "get-routes-by-name"
+       (fact "gets the route with the specified id"
+             (with-fake-routes
+               {(str (ik/routes-url innkeeper-url) "?name=theroute")
+                (fn [_] {:status 200
+                         :body   (json/clj->json [route-mock-response])})}
+
+               (get-routes-by-name "theroute" innkeeper-admin-config))))

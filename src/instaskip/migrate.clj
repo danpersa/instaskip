@@ -118,22 +118,40 @@
 
   [routes-dir innkeeper-config]
 
-  (let [innkeeper-routes-with-paths (-> routes-dir
-                                        team-names-in-dir
-                                        (teams-with-eskip routes-dir)
-                                        teams-with-eskip-maps
-                                        filter-teams-with-eskip-maps
-                                        routes-with-paths
-                                        (innkeeper-routes-with-paths innkeeper-config))]
+  (let [team-names (team-names-in-dir routes-dir)
+        teams-with-eskip (teams-with-eskip team-names routes-dir)
+        teams-with-eskip-maps (teams-with-eskip-maps teams-with-eskip)
+        filtered-teams-with-eskip-maps (filter-teams-with-eskip-maps teams-with-eskip-maps)
+        routes-with-paths (routes-with-paths filtered-teams-with-eskip-maps)
+        innkeeper-routes-with-paths (innkeeper-routes-with-paths routes-with-paths innkeeper-config)]
+
+    (println "Found" (count team-names) "teams.")
+    (println "Found" (count teams-with-eskip) "eskip files.")
+    (println "Transformed" (count teams-with-eskip-maps) "to eskip maps.")
+    (println "Filtered to" (count filtered-teams-with-eskip-maps) "eskip maps.")
+    (println "Transformed eskip maps to" (count routes-with-paths) "routes with paths.")
+    (println "Transformed routes with paths to"
+             (count innkeeper-routes-with-paths)
+             "innkeeper routes with paths.")
+
     (for [route-with-path innkeeper-routes-with-paths]
       (let [{:keys [route path]} route-with-path
             path-uri (path :uri)
             existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
         (if (not (nil? existing-path))
-          (let [innkeeper-route (assoc route :path-id (existing-path :id))]
-            (ik/post-route innkeeper-route innkeeper-config))
+          (let [innkeeper-route (assoc route :path-id (existing-path :id))
+                route-name (innkeeper-route :name)]
+            (println "Found existing path with uri:" (existing-path :uri))
+            (let [existing-routes (ik/get-routes-by-name route-name innkeeper-config)]
+              (if (empty? existing-routes)
+                (do (println "Posting a new route with name: " route-name)
+                    (ik/post-route innkeeper-route innkeeper-config))
+                (println "Found existing route with name:" route-name))))
+
           (let [innkeeper-path (ik/post-path path innkeeper-config)
                 innkeeper-route (assoc route :path-id (innkeeper-path :id))]
+            (println "Posting a new path with uri: " (innkeeper-path :uri))
+            (println "Posting a new route with name: " (innkeeper-route :name))
             (ik/post-route innkeeper-route innkeeper-config)))))))
 
 (comment (routes "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"

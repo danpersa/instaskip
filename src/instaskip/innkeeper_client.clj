@@ -22,6 +22,7 @@
 
 ;; host related functions
 (s/def :ik/id integer?)
+(s/def :ik/name string?)
 (s/def :ik/host (s/keys
                   :req-un
                   [:ik/id
@@ -205,3 +206,42 @@
       json/extract-body))
 
 (s/instrument #'post-route)
+
+(s/fdef get-route
+        :args (s/cat :id :ik/id :config :ik/config)
+        :ret :ik/response-route)
+
+(defn get-route
+  "Calls innkeeper and returns the route with the specified id"
+  [id {:keys [innkeeper-url oauth-token]}]
+
+  (json/extract-body
+    (http/get (str (routes-url innkeeper-url) "/" id)
+              {:accept    :json
+               :headers   {"Authorization" (build-token-header oauth-token)}
+               :insecure? true})))
+
+(s/instrument #'get-route)
+
+(s/fdef get-routes-by-name
+        :args (s/cat :name :ik/name :config :ik/config)
+        :ret (s/* :ik/response-route))
+
+(defn get-routes-by-name
+  "Calls innkeeper and returns the route with the specified name"
+  [name {:keys [innkeeper-url oauth-token]}]
+
+  (json/extract-body
+    (http/get (str (routes-url innkeeper-url) "?name=" name)
+              {:accept    :json
+               :headers   {"Authorization" (build-token-header oauth-token)}
+               :insecure? true})))
+
+(s/instrument #'get-routes-by-name)
+
+(comment (get-routes-by-name "vegas_recosRecoApi1"
+                    {:innkeeper-url "http://localhost:9080"
+                     :oauth-token   "token-user~1-employees-route.admin"})
+         (get-route 1
+                            {:innkeeper-url "http://localhost:9080"
+                             :oauth-token   "token-user~1-employees-route.admin"}))
