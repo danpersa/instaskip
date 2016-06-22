@@ -16,6 +16,21 @@
 (def write-token (build-token-header "token-user~1-employees-route.write"))
 (def admin-token (build-token-header "token-user~1-employees-route.admin"))
 
+(defn- json-post-request [json oauth-token]
+  {:body         (json/clj->json json)
+   :accept       :json
+   :content-type :json
+   :headers      {"Authorization"
+                  (build-token-header oauth-token)}
+   :insecure?    true})
+
+(defn- json-get-request [oauth-token]
+  {:accept       :json
+   :content-type :json
+   :headers      {"Authorization"
+                  (build-token-header oauth-token)}
+   :insecure?    true})
+
 (s/def :ik/config (s/keys :req-un
                           [:ik/innkeeper-url
                            :ik/oauth-token]))
@@ -35,8 +50,7 @@
 (defn get-hosts [{:keys [innkeeper-url oauth-token]}]
 
   (-> (http/get (hosts-url innkeeper-url)
-                {:headers   {"Authorization" (build-token-header oauth-token)}
-                 :insecure? true})
+                (json-get-request oauth-token))
       json/extract-body))
 
 (s/instrument #'get-hosts)
@@ -88,9 +102,7 @@
 
   (json/extract-body
     (http/get (str (paths-url innkeeper-url) "/" id)
-              {:accept    :json
-               :headers   {"Authorization" (build-token-header oauth-token)}
-               :insecure? true})))
+              (json-get-request oauth-token))))
 
 (s/instrument #'get-path)
 
@@ -104,15 +116,26 @@
 
   (log/debug "Create path: " path)
   (-> (http/post (paths-url innkeeper-url)
-                 {:body         (json/clj->json path)
-                  :accept       :json
-                  :content-type :json
-                  :headers      {"Authorization"
-                                 (build-token-header oauth-token)}
-                  :insecure?    true})
+                 (json-post-request path oauth-token))
       json/extract-body))
 
 (s/instrument #'post-path)
+
+(s/def :ik/request-patch-path (s/keys :opt-un [:ik/host-ids :ik/owned-by-team]))
+
+(s/fdef patch-path
+        :args (s/cat :id :ik/id :path :ik/request-patch-path :config :ik/config)
+        :ret :ik/response-path)
+(defn patch-path
+  "Posts a path to innkeeper. Returns the created path."
+  [path-id path {:keys [innkeeper-url oauth-token]}]
+
+  (log/debug "Patch path: " path)
+  (-> (http/post (str (paths-url innkeeper-url) "/" path-id)
+                 (json-post-request path oauth-token))
+      json/extract-body))
+
+(s/instrument #'patch-path)
 
 (s/def :ik/response-paths (s/* :ik/response-path))
 
@@ -121,10 +144,7 @@
 
 (defn get-paths [{:keys [innkeeper-url oauth-token]}]
   (-> (http/get (paths-url innkeeper-url)
-                {:accept    :json
-                 :headers   {"Authorization"
-                             (build-token-header oauth-token)}
-                 :insecure? true})
+                (json-get-request oauth-token))
       json/extract-body))
 
 (s/instrument #'get-paths)
@@ -198,11 +218,7 @@
 
   (log/debug "Create route " route)
   (-> (http/post (routes-url innkeeper-url)
-                 {:body         (json/clj->json route)
-                  :accept       :json
-                  :content-type :json
-                  :headers      {"Authorization" (build-token-header oauth-token)}
-                  :insecure?    true})
+                 (json-post-request route oauth-token))
       json/extract-body))
 
 (s/instrument #'post-route)
@@ -217,9 +233,7 @@
 
   (json/extract-body
     (http/get (str (routes-url innkeeper-url) "/" id)
-              {:accept    :json
-               :headers   {"Authorization" (build-token-header oauth-token)}
-               :insecure? true})))
+              (json-get-request oauth-token))))
 
 (s/instrument #'get-route)
 
@@ -233,15 +247,6 @@
 
   (json/extract-body
     (http/get (str (routes-url innkeeper-url) "?name=" name)
-              {:accept    :json
-               :headers   {"Authorization" (build-token-header oauth-token)}
-               :insecure? true})))
+              (json-get-request oauth-token))))
 
 (s/instrument #'get-routes-by-name)
-
-(comment (get-routes-by-name "vegas_recosRecoApi1"
-                    {:innkeeper-url "http://localhost:9080"
-                     :oauth-token   "token-user~1-employees-route.admin"})
-         (get-route 1
-                            {:innkeeper-url "http://localhost:9080"
-                             :oauth-token   "token-user~1-employees-route.admin"}))

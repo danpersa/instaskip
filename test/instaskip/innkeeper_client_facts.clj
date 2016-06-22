@@ -87,9 +87,22 @@
                          :body   (json/clj->json path-mock-response)})}
 
                (post-path {:uri           "/uri"
-                           :host-ids      [1, 2]
+                           :host-ids      [1]
                            :owned-by-team "team-1"}
                           innkeeper-admin-config)) => path-mock-response))
+
+(facts "patch-path"
+       (fact "patches a path"
+
+             (with-fake-routes
+               {(str (ik/paths-url innkeeper-url) "/1")
+                (fn [_] {:status 200
+                         :body   (json/clj->json path-mock-response)})}
+
+               (patch-path 1
+                           {:host-ids      [1 2]
+                            :owned-by-team "team-1"}
+                           innkeeper-admin-config)) => path-mock-response))
 
 (def route-mock-response {:id                  1
                           :name                "theroute"
