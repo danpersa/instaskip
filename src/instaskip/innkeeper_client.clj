@@ -131,8 +131,8 @@
   [path-id path {:keys [innkeeper-url oauth-token]}]
 
   (log/debug "Patch path: " path)
-  (-> (http/post (str (paths-url innkeeper-url) "/" path-id)
-                 (json-post-request path oauth-token))
+  (-> (http/patch (str (paths-url innkeeper-url) "/" path-id)
+                  (json-post-request path oauth-token))
       json/extract-body))
 
 (s/instrument #'patch-path)
