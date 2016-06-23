@@ -1,4 +1,4 @@
-(defproject org.clojars.danpersa/instaskip "0.2.7"
+(defproject org.clojars.danpersa/instaskip "0.2.8"
   :description "Transforms from eskip to json to eskip."
   :url "https://github.com/danpersa/instaskip"
   :license {:name "MIT License"
@@ -14,7 +14,7 @@
                  [me.raynes/fs              "1.4.6"]
                  [org.clojure/tools.cli     "0.3.5"]
                  [defun                     "0.3.0-alapha"]]
-  :main ^:skip-aot instaskip.core
+  :main instaskip.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
              :dev     {:source-paths ["dev"]
@@ -25,9 +25,6 @@
                                       [criterium                   "0.4.4"]
                                       [midje                       "1.9.0-alpha2"]
                                       [clj-http-fake               "1.0.2"]]}}
-
-  :deploy-repositories [["clojars" {:url           "https://clojars.org"
-                                    :sign-releases false}]]
   :aot [instaskip.eskip]
   ;; :jvm-opts ^:replace ["-Dclojure.compiler.direct-linking=true"]
   )

@@ -134,7 +134,7 @@
              (count innkeeper-routes-with-paths)
              "innkeeper routes with paths.")
 
-    (for [route-with-path innkeeper-routes-with-paths]
+    (doseq [route-with-path innkeeper-routes-with-paths]
       (let [{:keys [route path]} route-with-path
             path-uri (path :uri)
             existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
@@ -161,6 +161,3 @@
             (println "Posting a new route with name: " (innkeeper-route :name))
             (ik/post-route innkeeper-route innkeeper-config)))))))
 
-(comment (routes "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
-                 {:innkeeper-url "http://localhost:9080"
-                  :oauth-token   "token-user~1-employees-route.admin"}))

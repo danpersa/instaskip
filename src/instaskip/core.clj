@@ -62,18 +62,8 @@
   "The application's main function"
   [& args]
   (let [opts (parse-opts args cli-options :in-order false)]
-    (log/info opts)
+    (log/debug opts)
     (match opts
            {:options {:help true}} (exit 0 (usage (opts :summary)))
            {:options {:url url :token token}} (parse-action opts url token)
            :else (exit 1 "Invalid options"))))
-
-(comment (-main "-h")
-         (-main "--token" "token" "invalid")
-         (-main "--token" "token" "list-paths")
-         (-main "--token" "token" "list-routes")
-         (-main "--token" "token" "migrate-routes")
-         (-main "--token" "token" "migrate-routes" "-d" "/eskip-routes")
-         (-main "--token" "token" "migrate-routes"
-                "-d" "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
-                "-t" "token-user~1-employees-route.admin"))
