@@ -11,14 +11,14 @@ Download from https://clojars.org/org.clojars.danpersa/instaskip.
 
 For lein users
 
-    [org.clojars.danpersa/instaskip 0.2.0]
+    [org.clojars.danpersa/instaskip 0.2.7]
 
 For maven users
 
     <dependency>
       <groupId>org.clojars.danpersa</groupId>
       <artifactId>instaskip</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.7</version>
     </dependency>
 
 ## Publishing
@@ -29,7 +29,7 @@ For maven users
 
 FIXME: explanation
 
-    $ java -jar instaskip-0.2.0-standalone.jar [args]
+    $ java -jar instaskip-0.2.7-standalone.jar [args]
 
 Running the tests: `lein midje`
 

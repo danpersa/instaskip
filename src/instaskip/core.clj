@@ -29,9 +29,7 @@
         "Actions:"
         "  migrate-routes  Migrates the routes from an eskip directory to innkeeper"
         "  list-paths      Lists the paths for the current team"
-        "  list-routes     Lists the routes for the current team"
-        ""
-        "Please refer to the manual page for more information. (Which we don't have right now :P)"]
+        "  list-routes     Lists the routes for the current team"]
        (string/join \newline)))
 
 (defn- migrate-routes [dir url token]

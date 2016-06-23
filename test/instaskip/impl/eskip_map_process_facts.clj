@@ -86,17 +86,17 @@
                {:name       "aladdin_genieWishlistItemsApi",
                 :predicates [{:name "Path", :args [{:value "/api/wishlist", :type "string"}]}
                              {:name "Host",
-                              :args [{:value "/^(m-it[.]release[.]zalando[.]net|m-pl[.]release[.]zalando[.]net)$/",
+                              :args [{:value "/^(host1[.]com|host2[.]com)$/",
                                       :type  "regex"}]}],
                 :filters    [{:name "fashionStore", :args []}],
-                :endpoint   "https://genie.aladdin-staging.zalan.do"}) =>
+                :endpoint   "https://endpoint.com"}) =>
 
              {:path
-                     {:hosts         ["m-it.release.zalando.net" "m-pl.release.zalando.net"]
+                     {:hosts         ["host1.com" "host2.com"]
                       :uri           "/api/wishlist"
                       :owned-by-team "theTeam"}
               :route {:name                "aladdin_genieWishlistItemsApi"
                       :predicates          []
                       :filters             []
-                      :endpoint            "https://genie.aladdin-staging.zalan.do"
+                      :endpoint            "https://endpoint.com"
                       :uses-common-filters true}}))
