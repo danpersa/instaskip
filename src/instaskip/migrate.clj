@@ -146,8 +146,8 @@
                 existing-host-ids (existing-path :host-ids)]
             (println "Found existing path with uri:" (existing-path :uri))
 
-            (if (not= existing-host-ids new-host-ids)
-              (do (println "Updating host-ids from " existing-host-ids "to" new-host-ids)
+            (if (not= (set existing-host-ids) (set new-host-ids))
+              (do (println "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
                   (ik/patch-path path-id {:host-ids new-host-ids} innkeeper-config)))
             (let [existing-routes (ik/get-routes-by-name route-name innkeeper-config)]
               (if (empty? existing-routes)
@@ -162,5 +162,5 @@
             (ik/post-route innkeeper-route innkeeper-config)))))))
 
 (comment (routes "/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
-                 {:innkeeper-url "https://localhost:9080"
+                 {:innkeeper-url "http://localhost:9080"
                   :oauth-token   "token-user~1-employees-route.admin"}))
