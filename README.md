@@ -11,14 +11,14 @@ Download from https://clojars.org/org.clojars.danpersa/instaskip.
 
 For lein users
 
-    [org.clojars.danpersa/instaskip 0.2.8]
+    [org.clojars.danpersa/instaskip 0.2.9]
 
 For maven users
 
     <dependency>
       <groupId>org.clojars.danpersa</groupId>
       <artifactId>instaskip</artifactId>
-      <version>0.2.8</version>
+      <version>0.2.9</version>
     </dependency>
 
 ## Publishing
@@ -29,7 +29,7 @@ For maven users
 
 Example:
 
-    $ java -jar instaskip-0.2.8-standalone.jar \
+    $ java -jar instaskip-0.2.9-standalone.jar \
     --token="token-user~1-employees-route.admin" \
     migrate-routes --dir="/Users/dpersa/Prog/mosaic/mosaic-staging/routes/"
 
