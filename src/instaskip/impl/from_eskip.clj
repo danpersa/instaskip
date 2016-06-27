@@ -81,6 +81,15 @@ name-and-args-to-map [name & args]
       eskip-routes-parser
       transform-ast-to-map))
 
+(defn eskip->map
+  "Transforms an eskip route string to a map"
+  [eskip-routes]
+
+  (-> eskip-routes
+      eskip-routes-parser
+      transform-ast-to-map
+      first))
+
 (defn single-eskip->json
   "Transforms an eskip route string to a json string"
   [eskip-routes]
