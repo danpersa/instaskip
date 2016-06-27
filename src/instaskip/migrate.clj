@@ -8,7 +8,8 @@
             [instaskip.innkeeper-client :as ik]
             [defun :refer [fun]]
             [clojure.spec :as s]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [instaskip.actions.create :as create]))
 
 (defn- team-names-in-dir
   "Reads the routes dir and returns a list with the names of the teams"
@@ -112,7 +113,6 @@
   (->> routes-with-paths
        (map (partial r/route-with-path->innkeeper-route-with-path innkeeper-config))))
 
-
 (defn routes
   "Migrates the routes in the dir to the innkeeper instance with the specified url, using the token.
    The token should have innkeeper admin scope"
@@ -139,31 +139,7 @@
               "innkeeper routes with paths.")
 
      (doseq [route-with-path innkeeper-routes-with-paths]
-       (let [{:keys [route path]} route-with-path
-             path-uri (path :uri)
-             existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
-         (if (not (nil? existing-path))
-           (let [path-id (existing-path :id)
-                 innkeeper-route (assoc route :path-id path-id)
-                 route-name (innkeeper-route :name)
-                 new-host-ids (path :host-ids)
-                 existing-host-ids (existing-path :host-ids)]
-             (println "Found existing path with uri:" (existing-path :uri))
-
-             (if (not= (set existing-host-ids) (set new-host-ids))
-               (do (println "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
-                   (ik/patch-path path-id {:host-ids new-host-ids} innkeeper-config)))
-             (let [existing-routes (ik/get-routes-by-name route-name innkeeper-config)]
-               (if (empty? existing-routes)
-                 (do (println "Posting a new route with name: " route-name)
-                     (ik/post-route innkeeper-route innkeeper-config))
-                 (println "Found existing route with name:" route-name))))
-
-           (let [innkeeper-path (ik/post-path path innkeeper-config)
-                 innkeeper-route (assoc route :path-id (innkeeper-path :id))]
-             (println "Posting a new path with uri: " (innkeeper-path :uri))
-             (println "Posting a new route with name: " (innkeeper-route :name))
-             (ik/post-route innkeeper-route innkeeper-config)))))))
+       (create/create-innkeeper-route-with-path route-with-path innkeeper-config))))
 
   ([routes-dir innkeeper-config]
    (routes routes-dir innkeeper-config (team-names-in-dir routes-dir))))
