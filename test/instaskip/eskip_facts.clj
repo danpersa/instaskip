@@ -16,13 +16,13 @@
 
 (fact "should transform simple routes to json and back to eskip"
       (-> simple-eskip-routes
-          (eskip->json)
-          (json->eskip))
+          eskip->json
+          json->eskip)
       => simple-eskip-routes)
 
 
 (fact "should transform to json and back to eskip"
       (-> eskip-routes
-          (eskip->json)
-          (json->eskip))
+          eskip->json
+          json->eskip)
       => eskip-routes)

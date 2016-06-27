@@ -1,6 +1,7 @@
 (ns instaskip.impl.from-json
   (:require [clojure.data.json :as json]
-            [clojure.string :refer [join]]))
+            [clojure.string :refer [join]]
+            [clojure.core.match :refer [match]]))
 
 
 (def ^:private arrow "\n   -> ")
@@ -9,16 +10,11 @@
 
 (defn- eskip-name [eskip-map] (eskip-map "name"))
 
-(defn- is-not-regex? [arg]
-  (not
-    (and
-      (.startsWith arg "/^")
-      (.endsWith arg "$/"))))
-
-(defn- arg-to-type [arg]
-  (if (and (instance? String arg) (is-not-regex? arg))
-    (str "\"" arg "\"")
-    arg))
+(defn- ^{:testable true} arg-to-type [arg]
+  (match [arg]
+         [{"value" value "type" "string"}] (str "\"" value "\"")
+         [{"value" value "type" "regex"}] value
+         [{"value" value "type" "number"}] value))
 
 (defn- arguments [args]
   (str "(" (join ", " (map arg-to-type args)) ")"))
