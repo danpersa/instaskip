@@ -112,52 +112,59 @@
   (->> routes-with-paths
        (map (partial r/route-with-path->innkeeper-route-with-path innkeeper-config))))
 
+
 (defn routes
   "Migrates the routes in the dir to the innkeeper instance with the specified url, using the token.
    The token should have innkeeper admin scope"
 
-  [routes-dir innkeeper-config]
+  ([routes-dir teams innkeeper-config]
+   (println "Migrate routes. Eskip dir: " routes-dir
+            "\nTeams: " teams
+            "\nInnkeeper url: " (innkeeper-config :url)
+            "\nOAuth token: " (innkeeper-config :token))
 
-  (let [team-names (team-names-in-dir routes-dir)
-        teams-with-eskip (teams-with-eskip team-names routes-dir)
-        teams-with-eskip-maps (teams-with-eskip-maps teams-with-eskip)
-        filtered-teams-with-eskip-maps (filter-teams-with-eskip-maps teams-with-eskip-maps)
-        routes-with-paths (routes-with-paths filtered-teams-with-eskip-maps)
-        innkeeper-routes-with-paths (innkeeper-routes-with-paths routes-with-paths innkeeper-config)]
+   (let [teams-with-eskip (teams-with-eskip teams routes-dir)
+         teams-with-eskip-maps (teams-with-eskip-maps teams-with-eskip)
+         filtered-teams-with-eskip-maps (filter-teams-with-eskip-maps teams-with-eskip-maps)
+         routes-with-paths (routes-with-paths filtered-teams-with-eskip-maps)
+         innkeeper-routes-with-paths (innkeeper-routes-with-paths routes-with-paths innkeeper-config)]
 
-    (println "Found" (count team-names) "teams.")
-    (println "Found" (count teams-with-eskip) "eskip files.")
-    (println "Transformed" (count teams-with-eskip-maps) "to eskip maps.")
-    (println "Filtered to" (count filtered-teams-with-eskip-maps) "eskip maps.")
-    (println "Transformed eskip maps to" (count routes-with-paths) "routes with paths.")
-    (println "Transformed routes with paths to"
-             (count innkeeper-routes-with-paths)
-             "innkeeper routes with paths.")
+     (println "Found" (count teams) "team(s).")
+     (println "Found" (count teams-with-eskip) "eskip file(s).")
+     (println "Transformed" (count teams-with-eskip-maps) "to eskip maps.")
+     (println "Filtered to" (count filtered-teams-with-eskip-maps) "eskip maps.")
+     (println "Transformed eskip maps to" (count routes-with-paths) "routes with paths.")
+     (println "Transformed routes with paths to"
+              (count innkeeper-routes-with-paths)
+              "innkeeper routes with paths.")
 
-    (doseq [route-with-path innkeeper-routes-with-paths]
-      (let [{:keys [route path]} route-with-path
-            path-uri (path :uri)
-            existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
-        (if (not (nil? existing-path))
-          (let [path-id (existing-path :id)
-                innkeeper-route (assoc route :path-id path-id)
-                route-name (innkeeper-route :name)
-                new-host-ids (path :host-ids)
-                existing-host-ids (existing-path :host-ids)]
-            (println "Found existing path with uri:" (existing-path :uri))
+     (doseq [route-with-path innkeeper-routes-with-paths]
+       (let [{:keys [route path]} route-with-path
+             path-uri (path :uri)
+             existing-path ((ik/path-uris-to-paths innkeeper-config) path-uri)]
+         (if (not (nil? existing-path))
+           (let [path-id (existing-path :id)
+                 innkeeper-route (assoc route :path-id path-id)
+                 route-name (innkeeper-route :name)
+                 new-host-ids (path :host-ids)
+                 existing-host-ids (existing-path :host-ids)]
+             (println "Found existing path with uri:" (existing-path :uri))
 
-            (if (not= (set existing-host-ids) (set new-host-ids))
-              (do (println "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
-                  (ik/patch-path path-id {:host-ids new-host-ids} innkeeper-config)))
-            (let [existing-routes (ik/get-routes-by-name route-name innkeeper-config)]
-              (if (empty? existing-routes)
-                (do (println "Posting a new route with name: " route-name)
-                    (ik/post-route innkeeper-route innkeeper-config))
-                (println "Found existing route with name:" route-name))))
+             (if (not= (set existing-host-ids) (set new-host-ids))
+               (do (println "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
+                   (ik/patch-path path-id {:host-ids new-host-ids} innkeeper-config)))
+             (let [existing-routes (ik/get-routes-by-name route-name innkeeper-config)]
+               (if (empty? existing-routes)
+                 (do (println "Posting a new route with name: " route-name)
+                     (ik/post-route innkeeper-route innkeeper-config))
+                 (println "Found existing route with name:" route-name))))
 
-          (let [innkeeper-path (ik/post-path path innkeeper-config)
-                innkeeper-route (assoc route :path-id (innkeeper-path :id))]
-            (println "Posting a new path with uri: " (innkeeper-path :uri))
-            (println "Posting a new route with name: " (innkeeper-route :name))
-            (ik/post-route innkeeper-route innkeeper-config)))))))
+           (let [innkeeper-path (ik/post-path path innkeeper-config)
+                 innkeeper-route (assoc route :path-id (innkeeper-path :id))]
+             (println "Posting a new path with uri: " (innkeeper-path :uri))
+             (println "Posting a new route with name: " (innkeeper-route :name))
+             (ik/post-route innkeeper-route innkeeper-config)))))))
+
+  ([routes-dir innkeeper-config]
+   (routes routes-dir innkeeper-config (team-names-in-dir routes-dir))))
 
