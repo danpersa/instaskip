@@ -4,7 +4,7 @@
             [clojure.string :refer [split]]
             [clojure.spec :as s]))
 
-(defn- ^{:testable true} split-hosts
+(defn- split-hosts
   "Splits a regex of hosts into an array of hosts."
   [hosts-string]
 
@@ -14,9 +14,9 @@
         hosts-with-normalized-dot (.replace trimmed-hosts "[.]" ".")]
     (split hosts-with-normalized-dot #"[|]")))
 
-(def ^{:private true :testable true} common-filters #{"fashionStore"})
+(def ^{:private true} common-filters #{"fashionStore"})
 
-(defn- ^{:testable true} filters-to-innkeeper
+(defn- filters-to-innkeeper
   "Transforms a list of filters to a map containg the fact that the route uses the common filters.
    Removes the common filters from the initial list"
   [filters]
@@ -38,7 +38,7 @@
                new-filters
                new-use-common-filters)))))
 
-(defn- ^{:testable true} predicates-to-innkeeper
+(defn- predicates-to-innkeeper
   "Transforms a list of predicates to a map containing innkeeper predicates, uris and hosts.
 
    It returns a map with the format:

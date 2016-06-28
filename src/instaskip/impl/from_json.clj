@@ -6,11 +6,11 @@
 
 (def ^:private arrow "\n   -> ")
 
-(defn- ^{:testable true} eskip-json-to-clj [eskip-json] (json/read-str eskip-json))
+(defn- eskip-json-to-clj [eskip-json] (json/read-str eskip-json))
 
 (defn- eskip-name [eskip-map] (eskip-map "name"))
 
-(defn- ^{:testable true} arg-to-type [arg]
+(defn- arg-to-type [arg]
   (m/match [arg]
            [{"value" value "type" "string"}] (str "\"" value "\"")
            [{"value" value "type" "regex"}] value
@@ -19,7 +19,7 @@
 (defn- arguments [args]
   (str "(" (str/join ", " (map arg-to-type args)) ")"))
 
-(defn- ^{:testable true} predicates [eskip-map]
+(defn- predicates [eskip-map]
   (let [preds (eskip-map "predicates")]
     (if (empty? preds)
       "*"
@@ -31,7 +31,7 @@
                                 (arguments
                                   (predicate "args")))))) preds)))))
 
-(defn- ^{:testable true} filters [eskip-map]
+(defn- filters [eskip-map]
   (let [filters (eskip-map "filters")]
     (str/join arrow
               (map (fn [filter]
@@ -40,7 +40,7 @@
                             (arguments
                               (filter "args"))))) filters))))
 
-(defn- ^{:testable true} endpoint [eskip-map]
+(defn- endpoint [eskip-map]
   (let [endpoint (eskip-map "endpoint")]
     (if (empty? endpoint)
       (str arrow "<shunt>")

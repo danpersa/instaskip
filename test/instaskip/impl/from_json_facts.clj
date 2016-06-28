@@ -1,9 +1,16 @@
 (ns instaskip.impl.from-json-facts
   (:require [instaskip.impl.from-json :refer :all]
             [midje.sweet :refer :all]
-            [midje.util :refer [expose-testables]]))
+            [midje.util :refer [testable-privates]]))
 
-(expose-testables instaskip.impl.from-json)
+
+
+(testable-privates instaskip.impl.from-json
+                   eskip-json-to-clj
+                   arg-to-type
+                   predicates
+                   filters
+                   endpoint)
 
 (def eskip-json
   (str "{\"name\":\"hello1\","

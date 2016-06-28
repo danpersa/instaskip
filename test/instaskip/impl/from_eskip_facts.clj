@@ -1,10 +1,11 @@
 (ns instaskip.impl.from-eskip-facts
   (:require [midje.sweet :refer :all]
             [instaskip.impl.from-eskip :refer :all]
-            [midje.util :refer [expose-testables]]
-            [clojure.string :refer [join]]))
+            [midje.util :refer [testable-privates]]))
 
-(expose-testables instaskip.impl.from-eskip)
+(testable-privates instaskip.impl.from-eskip
+                   name-and-args-to-map
+                   eskip-routes-parser)
 
 (facts "eskip-routes-parser"
        (fact "parses a simple route"
