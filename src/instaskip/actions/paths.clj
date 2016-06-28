@@ -2,14 +2,14 @@
 
 (defn list-paths [filters innkeeper-config]
 
-  (let [paths (match filters
-                     {:team team}
-                     ; =>
-                     (ik/get-paths {:owned-by-team team} innkeeper-config)
+  (let [paths (m/match filters
+                       {:team team}
+                       ; =>
+                       (ik/get-paths {:owned-by-team team} innkeeper-config)
 
-                     :else
-                     ; =>
-                     (ik/get-paths innkeeper-config))
+                       :else
+                       ; =>
+                       (ik/get-paths innkeeper-config))
 
         paths-with-hosts (->> paths
                               (map (fn [{:keys [id uri]}]

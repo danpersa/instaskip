@@ -2,11 +2,11 @@
 
 (defn list-routes [filters innkeeper-config]
 
-  (match filters
-         {:team team}
-         ; =>
-         (ik/get-paths {:owned-by-team team} innkeeper-config)
+  (m/match filters
+           {:team team}
+           ; =>
+           (ik/get-paths {:owned-by-team team} innkeeper-config)
 
-         :else
-         ; =>
-         (ik/get-paths innkeeper-config)))
+           :else
+           ; =>
+           (ik/get-paths innkeeper-config)))

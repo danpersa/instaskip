@@ -3,7 +3,6 @@
             [instaskip.json :as json]
             [clojure.spec :as s]
             [clojure.tools.logging :as log]
-            [defun :refer [defun]]
             [instaskip.case-utils :as cu]))
 
 ;; config related defs

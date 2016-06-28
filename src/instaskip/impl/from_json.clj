@@ -1,7 +1,7 @@
 (ns instaskip.impl.from-json
   (:require [clojure.data.json :as json]
-            [clojure.string :refer [join]]
-            [clojure.core.match :refer [match]]))
+            [clojure.core.match :as m]
+            [clojure.string :as str]))
 
 
 (def ^:private arrow "\n   -> ")
@@ -11,34 +11,34 @@
 (defn- eskip-name [eskip-map] (eskip-map "name"))
 
 (defn- ^{:testable true} arg-to-type [arg]
-  (match [arg]
-         [{"value" value "type" "string"}] (str "\"" value "\"")
-         [{"value" value "type" "regex"}] value
-         [{"value" value "type" "number"}] value))
+  (m/match [arg]
+           [{"value" value "type" "string"}] (str "\"" value "\"")
+           [{"value" value "type" "regex"}] value
+           [{"value" value "type" "number"}] value))
 
 (defn- arguments [args]
-  (str "(" (join ", " (map arg-to-type args)) ")"))
+  (str "(" (str/join ", " (map arg-to-type args)) ")"))
 
 (defn- ^{:testable true} predicates [eskip-map]
   (let [preds (eskip-map "predicates")]
     (if (empty? preds)
       "*"
-      (join " && "
-            (map (fn [predicate]
-                   (let [name (eskip-name predicate)]
-                     (str name
-                          (if (not= name "*")
-                            (arguments
-                              (predicate "args")))))) preds)))))
+      (str/join " && "
+                (map (fn [predicate]
+                       (let [name (eskip-name predicate)]
+                         (str name
+                              (if (not= name "*")
+                                (arguments
+                                  (predicate "args")))))) preds)))))
 
 (defn- ^{:testable true} filters [eskip-map]
   (let [filters (eskip-map "filters")]
-    (join arrow
-          (map (fn [filter]
-                 (let [name (eskip-name filter)]
-                   (str name
-                        (arguments
-                          (filter "args"))))) filters))))
+    (str/join arrow
+              (map (fn [filter]
+                     (let [name (eskip-name filter)]
+                       (str name
+                            (arguments
+                              (filter "args"))))) filters))))
 
 (defn- ^{:testable true} endpoint [eskip-map]
   (let [endpoint (eskip-map "endpoint")]
@@ -49,9 +49,9 @@
 (defn- single-json->eskip [eskip-map]
   (str (eskip-name eskip-map)
        ": "
-       (join arrow
-             (filter #(not-empty %) [(predicates eskip-map)
-                                     (filters eskip-map)]))
+       (str/join arrow
+                 (filter #(not-empty %) [(predicates eskip-map)
+                                         (filters eskip-map)]))
        (endpoint eskip-map)
        ";"))
 
@@ -61,7 +61,7 @@
 
 (defmethod ^:private multi-json->eskip clojure.lang.PersistentVector
   [eskip-json]
-  (join "\n\n" (map single-json->eskip eskip-json)))
+  (str/join "\n\n" (map single-json->eskip eskip-json)))
 
 (defmethod ^:private multi-json->eskip clojure.lang.PersistentArrayMap
   [eskip-json]

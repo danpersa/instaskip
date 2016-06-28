@@ -3,7 +3,7 @@
             [instaskip.impl.eskip-map-process :as em]
             [instaskip.route-with-path-process :as r]
             [instaskip.innkeeper-client :as ik]
-            [clojure.core.match :refer [match]]
+            [clojure.core.match :as m]
             [table.core :refer [table]]
             [clojure.string :as string]))
 

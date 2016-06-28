@@ -1,12 +1,9 @@
 (ns instaskip.migrate
   (:require [me.raynes.fs :as fs]
-            [clojure.core.match :refer [match]]
             [cats.builtin]
             [instaskip.impl.from-eskip :as eskip]
             [instaskip.impl.eskip-map-process :as em]
             [instaskip.route-with-path-process :as r]
-            [instaskip.innkeeper-client :as ik]
-            [defun :refer [fun]]
             [clojure.spec :as s]
             [clojure.string :as string]
             [instaskip.actions :as actions]))
@@ -53,10 +50,10 @@
 
   [teams-with-eskip]
   (->> teams-with-eskip
-       (mapcat (fun [{:team team :eskip eskip}]
-                    (->> (eskip/eskip->maps eskip)
-                         (map (fn [eskip-map] {:team      team
-                                               :eskip-map eskip-map})))))
+       (mapcat (fn [{:keys [team eskip]}]
+                 (->> (eskip/eskip->maps eskip)
+                      (map (fn [eskip-map] {:team      team
+                                            :eskip-map eskip-map})))))
        vec))
 
 (defn- path-without-star-predicate?
@@ -90,10 +87,10 @@
 
   [teams-with-eskip-maps]
   (filter
-    (fun [{:team _ :eskip-map eskip-map}]
-         (let [predicates (:predicates eskip-map)]
-           (and (has-element? predicates host-predicate?)
-                (has-element? predicates path-without-star-predicate?))))
+    (fn [{:keys [eskip-map]}]
+      (let [predicates (:predicates eskip-map)]
+        (and (has-element? predicates host-predicate?)
+             (has-element? predicates path-without-star-predicate?))))
     teams-with-eskip-maps))
 
 (defn- routes-with-paths
@@ -101,8 +98,8 @@
 
   [teams-with-eskip-maps]
   (->> teams-with-eskip-maps
-       (map (fun [{:team team :eskip-map eskip-map}]
-                 (em/eskip-map->route-with-path team eskip-map)))))
+       (map (fn [{:keys [team eskip-map]}]
+              (em/eskip-map->route-with-path team eskip-map)))))
 
 
 (defn- innkeeper-routes-with-paths

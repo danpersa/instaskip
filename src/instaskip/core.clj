@@ -1,10 +1,9 @@
 (ns instaskip.core
   (:require [clojure.tools.cli :refer [parse-opts]]
-            [clojure.core.match :refer [match]]
+            [clojure.core.match :as m]
             [clojure.tools.logging :as log]
             [clojure.string :as string]
             [instaskip.migrate :as migrate]
-            [defun :refer [defun defun-]]
             [instaskip.actions :as actions])
 
   (:gen-class :main true))
@@ -18,10 +17,11 @@
    ["-i" "--id ID" "An id. For actions: hosts-for-path"]
    ["-h" "--help" "Displays this" :default false]])
 
-(defn- exit [status msg]
-  (println msg)
-  ;(System/exit status)
-  )
+(defn- exit
+  ([status msg]
+   (println msg)
+   (System/exit status))
+  ([status] (System/exit status)))
 
 (defn- usage [options-summary]
   (->> ["This is the innkeeper cli."
@@ -40,86 +40,87 @@
        (string/join \newline)))
 
 (defn- migrate-routes [opts url token]
-  (match opts
-         {:dir dir :team team}
-         ; =>
-         (migrate/routes dir [team] {:innkeeper-url url
-                                     :oauth-token   token})
+  (m/match opts
+           {:dir dir :team team}
+           ; =>
+           (migrate/routes dir [team] {:innkeeper-url url
+                                       :oauth-token   token})
 
-         {:dir dir}
-         ; =>
-         (migrate/routes dir {:innkeeper-url url
-                              :oauth-token   token})
+           {:dir dir}
+           ; =>
+           (migrate/routes dir {:innkeeper-url url
+                                :oauth-token   token})
 
-         :else
-         ; =>
-         (exit 1 "Invalid options for migrate-routes")))
+           :else
+           ; =>
+           (exit 1 "Invalid options for migrate-routes")))
 
 (defn- create [opts url token]
-  (match opts
-         {:route route :team team}
-         ; =>
-         (actions/create route team {:innkeeper-url url
-                                     :oauth-token   token})
+  (m/match opts
+           {:route route :team team}
+           ; =>
+           (actions/create route team {:innkeeper-url url
+                                       :oauth-token   token})
 
-         :else
-         ; =>
-         (exit 1 "Invalid options for create")))
+           :else
+           ; =>
+           (exit 1 "Invalid options for create")))
 
 (defn- list-paths [opts url token]
-  (match opts
-         {:team team}
-         ; =>
-         (do (println "List paths for team:" team)
-             (actions/list-paths {:team team} {:innkeeper-url url
-                                               :oauth-token   token}))
-         {}
-         ; =>
-         (do (println "List all paths")
-             (actions/list-paths {} {:innkeeper-url url
-                                     :oauth-token   token}))
-         :else
-         ; =>
-         (exit 1 "Invalid options for create")))
+  (m/match opts
+           {:team team}
+           ; =>
+           (do (println "List paths for team:" team)
+               (actions/list-paths {:team team} {:innkeeper-url url
+                                                 :oauth-token   token}))
+           {}
+           ; =>
+           (do (println "List all paths")
+               (actions/list-paths {} {:innkeeper-url url
+                                       :oauth-token   token}))
+           :else
+           ; =>
+           (exit 1 "Invalid options for create")))
 
 (defn- hosts-for-path [opts url token]
-  (match opts
-         {:id path-id}
-         ; =>
-         (actions/list-hosts-for-path (Integer. path-id) {:innkeeper-url url
-                                                          :oauth-token   token})
+  (m/match opts
+           {:id path-id}
+           ; =>
+           (actions/list-hosts-for-path (Integer. path-id) {:innkeeper-url url
+                                                            :oauth-token   token})
 
-         :else
-         ; =>
-         (exit 1 "Invalid options for hosts-for-path")))
+           :else
+           ; =>
+           (exit 1 "Invalid options for hosts-for-path")))
 
 (defn- list-routes [opts url token]
-  (match opts
-         {:team team}
-         ; =>
-         (actions/list-routes team {:innkeeper-url url
-                                    :oauth-token   token})
+  (m/match opts
+           {:team team}
+           ; =>
+           (actions/list-routes team {:innkeeper-url url
+                                      :oauth-token   token})
 
-         :else
-         ; =>
-         (exit 1 "Invalid options for create")))
+           :else
+           ; =>
+           (exit 1 "Invalid options for create")))
 
 (defn- parse-action [params url token]
   (let [options (params :options)]
-    (match params
-           {:arguments ["migrate-routes"]} (migrate-routes options url token)
-           {:arguments ["create"]} (create options url token)
-           {:arguments ["list-paths"]} (list-paths options url token)
-           {:arguments ["hosts-for-path"]} (hosts-for-path options url token)
-           {:arguments ["list-routes"]} (list-routes options url token)
-           :else (exit 1 "Invalid action"))))
+    (m/match params
+             {:arguments ["migrate-routes"]} (migrate-routes options url token)
+             {:arguments ["create"]} (create options url token)
+             {:arguments ["list-paths"]} (list-paths options url token)
+             {:arguments ["hosts-for-path"]} (hosts-for-path options url token)
+             {:arguments ["list-routes"]} (list-routes options url token)
+             :else (exit 1 "Invalid action"))))
 
 (defn -main
   "The application's main function"
   [& args]
   (let [params (parse-opts args cli-options :in-order false)]
     (log/debug params)
-    (match params
-           {:options {:help true}} (exit 0 (usage (params :summary)))
-           {:options {:url url :token token}} (parse-action params url token)
-           :else (exit 1 "Invalid options"))))
+    (m/match params
+             {:options {:help true}} (exit 0 (usage (params :summary)))
+             {:options {:url url :token token}} (parse-action params url token)
+             :else (exit 1 "Invalid options")))
+  (exit 0))

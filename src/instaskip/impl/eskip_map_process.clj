@@ -1,6 +1,6 @@
 (ns instaskip.impl.eskip-map-process
   (:require [instaskip.impl.from-eskip :as from-eskip :only [eskip->map]]
-            [clojure.core.match :refer [match]]
+            [clojure.core.match :as m]
             [clojure.string :refer [split]]
             [clojure.spec :as s]))
 
@@ -56,23 +56,23 @@
        :uri        uri
        :predicates result-predicates}
       (let [current-predicate (first old-predicates)]
-        (match [current-predicate]
-               [{:name "Host" :args
-                       [{:value value
-                         :type  "regex"}]}] (recur (rest old-predicates)
-                                                   result-predicates
-                                                   (split-hosts value)
-                                                   uri)
-               [{:name "Path" :args
-                       [{:value value
-                         :type  "string"}]}] (recur (rest old-predicates)
-                                                    result-predicates
-                                                    hosts
-                                                    value)
-               :else (recur (rest old-predicates)
-                            (conj result-predicates current-predicate)
-                            hosts
-                            uri))))))
+        (m/match [current-predicate]
+                 [{:name "Host" :args
+                         [{:value value
+                           :type  "regex"}]}] (recur (rest old-predicates)
+                                                     result-predicates
+                                                     (split-hosts value)
+                                                     uri)
+                 [{:name "Path" :args
+                         [{:value value
+                           :type  "string"}]}] (recur (rest old-predicates)
+                                                      result-predicates
+                                                      hosts
+                                                      value)
+                 :else (recur (rest old-predicates)
+                              (conj result-predicates current-predicate)
+                              hosts
+                              uri))))))
 
 (s/def :ti/eskip-map (s/keys :req-un
                              [:ik/name
