@@ -9,7 +9,7 @@
             [defun :refer [fun]]
             [clojure.spec :as s]
             [clojure.string :as string]
-            [instaskip.actions.create :as create]))
+            [instaskip.actions :as actions]))
 
 (defn- team-names-in-dir
   "Reads the routes dir and returns a list with the names of the teams"
@@ -139,7 +139,7 @@
               "innkeeper routes with paths.")
 
      (doseq [route-with-path innkeeper-routes-with-paths]
-       (create/create-innkeeper-route-with-path route-with-path innkeeper-config))))
+       (actions/create-innkeeper-route-with-path route-with-path innkeeper-config))))
 
   ([routes-dir innkeeper-config]
    (routes routes-dir innkeeper-config (team-names-in-dir routes-dir))))

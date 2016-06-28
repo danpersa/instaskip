@@ -5,7 +5,8 @@
             [clojure.string :as string]
             [instaskip.migrate :as migrate]
             [defun :refer [defun defun-]]
-            [instaskip.actions.create :as create])
+            [instaskip.actions :as actions])
+
   (:gen-class :main true))
 
 (def ^{:private true} cli-options
@@ -14,6 +15,7 @@
    ["-T" "--team TEAM" "The name of the team. Optional for actions: migrate-routes create list-paths list-routes"]
    ["-d" "--dir DIR" "The directory with the eskip files. For action: migrate-routes"]
    ["-R" "--route ROUTE" "An eskip route. For action: create"]
+   ["-i" "--id ID" "An id. For actions: hosts-for-path"]
    ["-h" "--help" "Displays this" :default false]])
 
 (defn- exit [status msg]
@@ -33,6 +35,7 @@
         "  migrate-routes  Migrates the routes from an eskip directory to innkeeper"
         "  create          Posts an eskip path and route to innkeeper"
         "  list-paths      Lists the paths. Can be filtered by team"
+        "  hosts-for-path  Hosts for path. Needs an path id"
         "  list-routes     Lists the routes. Can be filtered by team"]
        (string/join \newline)))
 
@@ -56,18 +59,50 @@
   (match opts
          {:route route :team team}
          ; =>
-         (create/create route team {:innkeeper-url url
-                                    :oauth-token   token})
+         (actions/create route team {:innkeeper-url url
+                                     :oauth-token   token})
 
          :else
          ; =>
          (exit 1 "Invalid options for create")))
 
 (defn- list-paths [opts url token]
-  (println "List paths. Under construction."))
+  (match opts
+         {:team team}
+         ; =>
+         (do (println "List paths for team:" team)
+             (actions/list-paths {:team team} {:innkeeper-url url
+                                               :oauth-token   token}))
+         {}
+         ; =>
+         (do (println "List all paths")
+             (actions/list-paths {} {:innkeeper-url url
+                                     :oauth-token   token}))
+         :else
+         ; =>
+         (exit 1 "Invalid options for create")))
+
+(defn- hosts-for-path [opts url token]
+  (match opts
+         {:id path-id}
+         ; =>
+         (actions/list-hosts-for-path (Integer. path-id) {:innkeeper-url url
+                                                          :oauth-token   token})
+
+         :else
+         ; =>
+         (exit 1 "Invalid options for hosts-for-path")))
 
 (defn- list-routes [opts url token]
-  (println "List routes. Under construction."))
+  (match opts
+         {:team team}
+         ; =>
+         (actions/list-routes team {:innkeeper-url url
+                                    :oauth-token   token})
+
+         :else
+         ; =>
+         (exit 1 "Invalid options for create")))
 
 (defn- parse-action [params url token]
   (let [options (params :options)]
@@ -75,6 +110,7 @@
            {:arguments ["migrate-routes"]} (migrate-routes options url token)
            {:arguments ["create"]} (create options url token)
            {:arguments ["list-paths"]} (list-paths options url token)
+           {:arguments ["hosts-for-path"]} (hosts-for-path options url token)
            {:arguments ["list-routes"]} (list-routes options url token)
            :else (exit 1 "Invalid action"))))
 

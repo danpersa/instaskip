@@ -1,8 +1,4 @@
-(ns instaskip.actions.create
-  (:require [instaskip.impl.from-eskip :as eskip]
-            [instaskip.impl.eskip-map-process :as em]
-            [instaskip.route-with-path-process :as r]
-            [instaskip.innkeeper-client :as ik]))
+(in-ns 'instaskip.actions)
 
 (defn create-innkeeper-route-with-path
   [{:keys [route path]} innkeeper-config]
