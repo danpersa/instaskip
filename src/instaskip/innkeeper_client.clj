@@ -3,7 +3,7 @@
             [instaskip.json :as json]
             [clojure.spec :as s]
             [clojure.tools.logging :as log]
-            [defun :refer [defun]]))
+            [instaskip.case-utils :as cu]))
 
 ;; config related defs
 (defn hosts-url [innkeeper-url] (str innkeeper-url "/hosts"))
@@ -24,11 +24,12 @@
                   (build-token-header oauth-token)}
    :insecure?    true})
 
-(defn- json-get-request [oauth-token]
+(defn- json-get-request [{:keys [oauth-token query-params]}]
   {:accept       :json
    :content-type :json
    :headers      {"Authorization"
                   (build-token-header oauth-token)}
+   :query-params (cu/hyphen-keyword-map-keys->snake query-params)
    :insecure?    true})
 
 (s/def :ik/config (s/keys :req-un
@@ -50,13 +51,10 @@
 (defn get-hosts [{:keys [innkeeper-url oauth-token]}]
 
   (-> (http/get (hosts-url innkeeper-url)
-                (json-get-request oauth-token))
+                (json-get-request {:oauth-token oauth-token}))
       json/extract-body))
 
 (s/instrument #'get-hosts)
-
-(defn- to-tuple-fn [id-to-host]
-  [(id-to-host :name) (Integer. (id-to-host :id))])
 
 (s/def :k/hosts-to-ids (s/map-of string? integer?))
 (s/fdef hosts-to-ids
@@ -67,12 +65,27 @@
   "Returns map from hosts to host ids"
   [config]
 
-  (->> (get-hosts config)
-       (map to-tuple-fn)
-       (into {})))
+  (let [to-name-id-tuple (fn [host] [(host :name) (host :id)])]
+    (->> (get-hosts config)
+         (map to-name-id-tuple)
+         (into {}))))
 
 (s/instrument #'hosts-to-ids)
 
+(s/fdef ids-to-hosts
+        :args (s/cat :config :ik/config)
+        :ret (s/map-of string? integer?))
+(defn ids-to-hosts
+  "Returns map from host ids to hosts"
+  [config]
+
+  (let [to-id-name-tuple
+        (fn [host] [(host :id) (host :name)])]
+
+    (->> (get-hosts config)
+         (map to-id-name-tuple)
+         (into {}))))
+(s/instrument #'ids-to-hosts)
 
 ;; path related functions
 
@@ -102,7 +115,7 @@
 
   (json/extract-body
     (http/get (str (paths-url innkeeper-url) "/" id)
-              (json-get-request oauth-token))))
+              (json-get-request {:oauth-token oauth-token}))))
 
 (s/instrument #'get-path)
 
@@ -138,14 +151,25 @@
 (s/instrument #'patch-path)
 
 (s/def :ik/response-paths (s/* :ik/response-path))
+(s/def :ik/query-param-key keyword?)
+(s/def :ik/query-param-value string?)
 
-(s/fdef get-paths :args (s/cat :config :ik/config)
+(s/fdef get-paths :args (s/alt
+                          :one-param (s/cat :config :ik/config)
+                          :two-params (s/cat :query-params (s/map-of :ik/query-param-key :ik/query-param-value)
+                                             :config :ik/config))
         :ret :ik/response-paths)
 
-(defn get-paths [{:keys [innkeeper-url oauth-token]}]
-  (-> (http/get (paths-url innkeeper-url)
-                (json-get-request oauth-token))
-      json/extract-body))
+(defn get-paths
+  ([innkeeper-config]
+
+   (get-paths {} innkeeper-config))
+
+  ([query-params {:keys [innkeeper-url oauth-token]}]
+
+   (-> (http/get (paths-url innkeeper-url)
+                 (json-get-request {:oauth-token oauth-token :query-params query-params}))
+       json/extract-body)))
 
 (s/instrument #'get-paths)
 
@@ -233,7 +257,7 @@
 
   (json/extract-body
     (http/get (str (routes-url innkeeper-url) "/" id)
-              (json-get-request oauth-token))))
+              (json-get-request {:oauth-token oauth-token}))))
 
 (s/instrument #'get-route)
 
@@ -246,7 +270,8 @@
   [name {:keys [innkeeper-url oauth-token]}]
 
   (json/extract-body
-    (http/get (str (routes-url innkeeper-url) "?name=" name)
-              (json-get-request oauth-token))))
+    (http/get (str (routes-url innkeeper-url))
+              {:query-params {"name" name}}
+              (json-get-request {:oauth-token oauth-token}))))
 
 (s/instrument #'get-routes-by-name)

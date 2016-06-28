@@ -14,15 +14,16 @@
 (def innkeeper-read-config {:innkeeper-url innkeeper-url
                             :oauth-token   ik/admin-token})
 
+(def hosts-mock-response [{:id 1 :name "host1.com"}
+                          {:id 2 :name "host2.com"}])
+
 (facts "get-hosts"
        (fact "returns a map of hosts"
 
              (with-fake-routes
                {(hosts-url innkeeper-url)
                 (fn [_] {:status 200
-                         :body   (json/clj->json
-                                   [{:id 1 :name "host1.com"}
-                                    {:id 2 :name "host2.com"}])})}
+                         :body   (json/clj->json hosts-mock-response)})}
 
                (get-hosts innkeeper-read-config) => [{:id 1 :name "host1.com"}
                                                      {:id 2 :name "host2.com"}])))
@@ -33,11 +34,21 @@
              (with-fake-routes
                {(ik/hosts-url innkeeper-url)
                 (fn [_] {:status 200
-                         :body   (json/clj->json [{:id 1 :name "host1.com"}
-                                                  {:id 2 :name "host2.com"}])})}
+                         :body   (json/clj->json hosts-mock-response)})}
 
                (hosts-to-ids innkeeper-read-config) => {"host1.com" 1
                                                         "host2.com" 2})))
+
+(facts "ids-to-hosts"
+       (fact "returns a map from ids to hosts"
+
+             (with-fake-routes
+               {(ik/hosts-url innkeeper-url)
+                (fn [_] {:status 200
+                         :body   (json/clj->json hosts-mock-response)})}
+
+               (ids-to-hosts innkeeper-read-config) => {1 "host1.com"
+                                                        2 "host2.com"})))
 
 (def path-mock-response {:id            1
                          :host-ids      [1 2]
@@ -56,7 +67,15 @@
                 (fn [_] {:status 200
                          :body   (json/clj->json paths-mock-response)})}
 
-               (get-paths innkeeper-read-config)) => paths-mock-response))
+               (get-paths {} innkeeper-read-config)) => paths-mock-response)
+       (fact "returns a list of paths for the specifified team"
+
+             (with-fake-routes
+               {(str (ik/paths-url innkeeper-url) "?owned_by_team=team-1")
+                (fn [_] {:status 200
+                         :body   (json/clj->json paths-mock-response)})}
+
+               (get-paths {:owned-by-team "team-1"} innkeeper-read-config)) => paths-mock-response))
 
 (fact "path-uris-to-paths"
       (fact "returs a map from path-uris to paths"

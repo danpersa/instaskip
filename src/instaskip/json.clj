@@ -4,8 +4,8 @@
 
 (defn clj->json [clj]
   (json/write-str clj
-                  :key-fn cu/hyphen-keyword-to-snake))
+                  :key-fn cu/hyphen-keyword->snake))
 
 (defn extract-body [response]
   (json/read-str (response :body)
-                 :key-fn cu/snake-to-hyphen-keyword))
+                 :key-fn cu/snake->hyphen-keyword))
