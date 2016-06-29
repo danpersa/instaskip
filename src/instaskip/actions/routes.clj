@@ -18,5 +18,8 @@
                                            :activate-at :created-at
                                            :uses-common-filters :endpoint])]
     (println "List route wiht id" id)
-    (t/table filtered-route)))
-
+    (t/table filtered-route)
+    (println "Filters for the route")
+    (t/table (route :filters))
+    (println "Predicates for the route")
+    (t/table (route :predicates))))
