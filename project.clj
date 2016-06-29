@@ -16,7 +16,8 @@
                  [table                     "0.5.0"]]
   :main instaskip.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}
+  :profiles {:uberjar {:aot :all
+                       :jvm-opts ^:replace ["-Dclojure.compiler.direct-linking=true"]}
              :dev     {:source-paths ["dev"]
                        :repl-options {:init-ns instaskip.eskip}
                        :plugins      [[lein-midje                  "3.2"]]
@@ -24,7 +25,4 @@
                                       [org.clojure/java.classpath  "0.2.3"]
                                       [criterium                   "0.4.4"]
                                       [midje                       "1.9.0-alpha2"]
-                                      [clj-http-fake               "1.0.2"]]}}
-  :aot [instaskip.eskip]
-  ;; :jvm-opts ^:replace ["-Dclojure.compiler.direct-linking=true"]
-  )
+                                      [clj-http-fake               "1.0.2"]]}})
