@@ -84,12 +84,12 @@
            ; =>
            (exit 1 "Invalid options for create")))
 
-(defn- list-hosts-for-path [opts url token]
+(defn- list-path [opts url token]
   (m/match opts
            {:id path-id}
            ; =>
-           (actions/list-hosts-for-path (Integer. path-id) {:innkeeper-url url
-                                                            :oauth-token   token})
+           (actions/list-path (Integer. path-id) {:innkeeper-url         url
+                                                            :oauth-token token})
 
            :else
            ; =>
@@ -132,7 +132,7 @@
              {:arguments ["migrate-routes"]} (migrate-routes options url token)
              {:arguments ["create"]} (create options url token)
              {:arguments ["list-paths"]} (list-paths options url token)
-             {:arguments ["list-hosts-for-path"]} (list-hosts-for-path options url token)
+             {:arguments ["list-path"]} (list-path options url token)
              {:arguments ["list-routes"]} (list-routes options url token)
              {:arguments ["list-route"]} (list-route options url token)
              {:arguments ["list-hosts"]} (list-hosts url token)
