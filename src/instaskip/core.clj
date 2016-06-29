@@ -32,11 +32,12 @@
         options-summary
         ""
         "Actions:"
-        "  migrate-routes  Migrates the routes from an eskip directory to innkeeper"
-        "  create          Posts an eskip path and route to innkeeper"
-        "  list-paths      Lists the paths. Can be filtered by team"
-        "  hosts-for-path  Hosts for path. Needs an path id"
-        "  list-routes     Lists the routes. Can be filtered by team"]
+        "  migrate-routes        Migrates the routes from an eskip directory to innkeeper"
+        "  create                Posts an eskip path and route to innkeeper"
+        "  list-paths            Lists the paths. Can be filtered by team"
+        "  list-hosts-for-path   Hosts for path. Needs an path id"
+        "  list-routes           Lists the routes. Can be filtered by team"
+        "  list-hosts            Lists the hosts"]
        (string/join \newline)))
 
 (defn- migrate-routes [opts url token]
@@ -82,7 +83,7 @@
            ; =>
            (exit 1 "Invalid options for create")))
 
-(defn- hosts-for-path [opts url token]
+(defn- list-hosts-for-path [opts url token]
   (m/match opts
            {:id path-id}
            ; =>
@@ -92,6 +93,10 @@
            :else
            ; =>
            (exit 1 "Invalid options for hosts-for-path")))
+
+(defn- list-hosts [url token]
+  (actions/list-hosts {:innkeeper-url url
+                       :oauth-token   token}))
 
 (defn- list-routes [opts url token]
   (m/match opts
@@ -110,8 +115,9 @@
              {:arguments ["migrate-routes"]} (migrate-routes options url token)
              {:arguments ["create"]} (create options url token)
              {:arguments ["list-paths"]} (list-paths options url token)
-             {:arguments ["hosts-for-path"]} (hosts-for-path options url token)
+             {:arguments ["list-hosts-for-path"]} (list-hosts-for-path options url token)
              {:arguments ["list-routes"]} (list-routes options url token)
+             {:arguments ["list-hosts"]} (list-hosts url token)
              :else (exit 1 "Invalid action"))))
 
 (defn -main

@@ -4,9 +4,10 @@
             [instaskip.route-with-path-process :as r]
             [instaskip.innkeeper-client :as ik]
             [clojure.core.match :as m]
-            [table.core :refer [table]]
+            [table.core :as t]
             [clojure.string :as string]))
 
 (load "actions/create")
 (load "actions/paths")
 (load "actions/routes")
+(load "actions/hosts")
