@@ -137,7 +137,6 @@
 
      (doseq [route-with-path innkeeper-routes-with-paths]
        (actions/create-innkeeper-route-with-path route-with-path innkeeper-config))))
-
   ([routes-dir innkeeper-config]
-   (routes routes-dir innkeeper-config (team-names-in-dir routes-dir))))
+   (routes routes-dir (team-names-in-dir routes-dir) innkeeper-config)))
 

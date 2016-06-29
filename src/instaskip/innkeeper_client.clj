@@ -153,10 +153,13 @@
 (s/def :ik/response-paths (s/* :ik/response-path))
 (s/def :ik/query-param-key keyword?)
 (s/def :ik/query-param-value string?)
+(s/def :ik/query-params (s/map-of
+                          :ik/query-param-key
+                          :ik/query-param-value))
 
 (s/fdef get-paths :args (s/alt
                           :one-param (s/cat :config :ik/config)
-                          :two-params (s/cat :query-params (s/map-of :ik/query-param-key :ik/query-param-value)
+                          :two-params (s/cat :query-params :ik/query-params
                                              :config :ik/config))
         :ret :ik/response-paths)
 
@@ -261,17 +264,22 @@
 
 (s/instrument #'get-route)
 
-(s/fdef get-routes-by-name
-        :args (s/cat :name :ik/name :config :ik/config)
+(s/fdef get-routes
+        :args (s/alt
+                :one-param (s/cat :config :ik/config)
+                :two-params (s/cat :query-params :ik/query-params
+                                   :config :ik/config))
         :ret (s/* :ik/response-route))
 
-(defn get-routes-by-name
-  "Calls innkeeper and returns the route with the specified name"
-  [name {:keys [innkeeper-url oauth-token]}]
+(defn get-routes
+  ([innkeeper-config]
 
-  (json/extract-body
-    (http/get (str (routes-url innkeeper-url))
-              {:query-params {"name" name}}
-              (json-get-request {:oauth-token oauth-token}))))
+   (get-routes {} innkeeper-config))
 
-(s/instrument #'get-routes-by-name)
+  ([query-params {:keys [innkeeper-url oauth-token]}]
+
+   (-> (http/get (routes-url innkeeper-url)
+                 (json-get-request {:oauth-token oauth-token :query-params query-params}))
+       json/extract-body)))
+
+(s/instrument #'get-routes)

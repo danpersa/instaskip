@@ -16,7 +16,7 @@
         (if (not= (set existing-host-ids) (set new-host-ids))
           (do (println "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
               (ik/patch-path path-id {:host-ids new-host-ids} innkeeper-config)))
-        (let [existing-routes (ik/get-routes-by-name route-name innkeeper-config)]
+        (let [existing-routes (ik/get-routes {:name route-name} innkeeper-config)]
           (if (empty? existing-routes)
             (do (println "Posting a new route with name: " route-name)
                 (ik/post-route innkeeper-route innkeeper-config))

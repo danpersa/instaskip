@@ -37,6 +37,7 @@
         "  list-paths            Lists the paths. Can be filtered by team"
         "  list-hosts-for-path   Hosts for path. Needs an path id"
         "  list-routes           Lists the routes. Can be filtered by team"
+        "  list-route            Lists a specific route."
         "  list-hosts            Lists the hosts"]
        (string/join \newline)))
 
@@ -102,12 +103,28 @@
   (m/match opts
            {:team team}
            ; =>
-           (actions/list-routes team {:innkeeper-url url
-                                      :oauth-token   token})
+           (actions/list-routes {:team team} {:innkeeper-url url
+                                              :oauth-token   token})
+
+           {}
+           ; =>
+           (actions/list-routes {} {:innkeeper-url url
+                                    :oauth-token   token})
 
            :else
            ; =>
-           (exit 1 "Invalid options for create")))
+           (exit 1 "Invalid options for list-routes")))
+
+(defn- list-route [opts url token]
+  (m/match opts
+           {:id id}
+           ; =>
+           (actions/list-route (Integer. id) {:innkeeper-url url
+                                              :oauth-token   token})
+
+           :else
+           ; =>
+           (exit 1 "Invalid options for list-route. Id should be present.")))
 
 (defn- parse-action [params url token]
   (let [options (params :options)]
@@ -117,6 +134,7 @@
              {:arguments ["list-paths"]} (list-paths options url token)
              {:arguments ["list-hosts-for-path"]} (list-hosts-for-path options url token)
              {:arguments ["list-routes"]} (list-routes options url token)
+             {:arguments ["list-route"]} (list-route options url token)
              {:arguments ["list-hosts"]} (list-hosts url token)
              :else (exit 1 "Invalid action"))))
 

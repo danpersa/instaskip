@@ -189,11 +189,11 @@
 
                (get-route 1 innkeeper-admin-config))))
 
-(facts "get-routes-by-name"
+(facts "get-routes"
        (fact "gets the route with the specified id"
              (with-fake-routes
                {(str (ik/routes-url innkeeper-url) "?name=theroute")
                 (fn [_] {:status 200
                          :body   (json/clj->json [route-mock-response])})}
 
-               (get-routes-by-name "theroute" innkeeper-admin-config))))
+               (get-routes {:name "theroute"} innkeeper-admin-config))))
