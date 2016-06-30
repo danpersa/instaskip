@@ -197,3 +197,12 @@
                          :body   (json/clj->json [route-mock-response])})}
 
                (get-routes {:name "theroute"} innkeeper-admin-config))))
+
+(facts "delete-route"
+       (fact "deletes the route with the specified id"
+             (with-fake-routes
+               {(str (ik/routes-url innkeeper-url) "/" 1)
+                (fn [_] {:status 200
+                         :body   ""})}
+
+               (delete-route 1 innkeeper-admin-config))))

@@ -23,3 +23,9 @@
     (t/table (route :filters))
     (println "Predicates for the route")
     (t/table (route :predicates))))
+
+
+(defn delete-route [id innkeeper-config]
+  (println "Deleting route with id" id)
+  (ik/delete-route id innkeeper-config)
+  (println "Done"))

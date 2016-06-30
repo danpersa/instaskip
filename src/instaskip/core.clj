@@ -35,9 +35,10 @@
         "  migrate-routes        Migrates the routes from an eskip directory to innkeeper"
         "  create                Posts an eskip path and route to innkeeper"
         "  list-paths            Lists the paths. Can be filtered by team"
-        "  list-path             Details for a path. Needs an path id"
+        "  list-path             Details for a path. Needs a path id"
         "  list-routes           Lists the routes. Can be filtered by team"
-        "  list-route            Lists a specific route."
+        "  list-route            Lists a specific route. Needs an id"
+        "  delete-route          Deletes a specific route. Needs an id"
         "  list-hosts            Lists the hosts"]
        (string/join \newline)))
 
@@ -79,8 +80,8 @@
 (defn- list-path [opts url token]
   (m/match opts
            {:id path-id}
-           (actions/list-path (Integer. path-id) {:innkeeper-url         url
-                                                            :oauth-token token})
+           (actions/list-path (Integer. path-id) {:innkeeper-url url
+                                                  :oauth-token   token})
 
            :else
            (exit 1 "Invalid options for hosts-for-path")))
@@ -111,6 +112,15 @@
            :else
            (exit 1 "Invalid options for list-route. Id should be present.")))
 
+(defn- delete-route [opts url token]
+  (m/match opts
+           {:id id}
+           (actions/delete-route (Integer. id) {:innkeeper-url url
+                                                :oauth-token   token})
+
+           :else
+           (exit 1 "Invalid options for list-route. Id should be present.")))
+
 (defn- parse-action [params url token]
   (let [options (params :options)]
     (m/match params
@@ -120,6 +130,7 @@
              {:arguments ["list-path"]} (list-path options url token)
              {:arguments ["list-routes"]} (list-routes options url token)
              {:arguments ["list-route"]} (list-route options url token)
+             {:arguments ["delete-route"]} (delete-route options url token)
              {:arguments ["list-hosts"]} (list-hosts url token)
              :else (exit 1 "Invalid action"))))
 

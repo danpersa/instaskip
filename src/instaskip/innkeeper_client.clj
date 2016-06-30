@@ -17,20 +17,20 @@
 (def admin-token (build-token-header "token-user~1-employees-route.admin"))
 
 (defn- json-post-request [json oauth-token]
-  {:body         (json/clj->json json)
-   :accept       :json
-   :content-type :json
-   :headers      {"Authorization"
-                  (build-token-header oauth-token)}
-   :insecure?    true})
+  {:body      (json/clj->json json)
+   :headers   {"Authorization"
+               (build-token-header oauth-token)}
+   :insecure? true})
 
-(defn- json-get-request [{:keys [oauth-token query-params]}]
-  {:accept       :json
-   :content-type :json
-   :headers      {"Authorization"
+(defn- get-request [{:keys [oauth-token query-params]}]
+  {:headers      {"Authorization"
                   (build-token-header oauth-token)}
    :query-params (cu/hyphen-keyword-map-keys->snake query-params)
    :insecure?    true})
+
+(defn- json-get-request [config]
+  (assoc (get-request config) :accept :json
+                              :content-type :json))
 
 (s/def :ik/config (s/keys :req-un
                           [:ik/innkeeper-url
@@ -272,6 +272,7 @@
         :ret (s/* :ik/response-route))
 
 (defn get-routes
+  "Retrives the routes from innkeeper. The routes can be filtered."
   ([innkeeper-config]
 
    (get-routes {} innkeeper-config))
@@ -283,3 +284,11 @@
        json/extract-body)))
 
 (s/instrument #'get-routes)
+
+
+(defn delete-route
+  "Deletes a route from innnkeeper"
+  [id {:keys [innkeeper-url oauth-token]}]
+
+  (http/delete (str (routes-url innkeeper-url) "/" id)
+               (get-request {:oauth-token oauth-token})))
