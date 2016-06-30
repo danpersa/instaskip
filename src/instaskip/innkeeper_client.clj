@@ -18,6 +18,8 @@
 
 (defn- json-post-request [json oauth-token]
   {:body      (json/clj->json json)
+   :accept       :json
+   :content-type :json
    :headers   {"Authorization"
                (build-token-header oauth-token)}
    :insecure? true})

@@ -12,7 +12,7 @@
   [["-u" "--url URL" "The url for innkeeper" :default "http://localhost:9080"]
    ["-t" "--token TOKEN" "The OAuth token"]
    ["-T" "--team TEAM" "The name of the team. Optional for actions: migrate-routes create list-paths list-routes"]
-   ["-d" "--dir DIR" "The directory with the eskip files. For action: migrate-routes"]
+   ["-d" "--dir DIR" "The directory with the routes in eskip format. Eg: ~/mosaic-staging/routes For action: migrate-routes"]
    ["-R" "--route ROUTE" "An eskip route. For action: create"]
    ["-i" "--id ID" "An id. For actions: hosts-for-path"]
    ["-h" "--help" "Displays this" :default false]])
