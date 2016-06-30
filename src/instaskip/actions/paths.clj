@@ -4,11 +4,9 @@
 
   (let [paths (m/match filters
                        {:team team}
-                       ; =>
                        (ik/get-paths {:owned-by-team team} innkeeper-config)
 
                        :else
-                       ; =>
                        (ik/get-paths innkeeper-config))
 
         paths-with-hosts (->> paths
