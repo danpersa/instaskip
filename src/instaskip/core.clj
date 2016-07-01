@@ -42,96 +42,87 @@
         "  list-hosts            Lists the hosts"]
        (string/join \newline)))
 
-(defn- migrate-routes [opts url token]
+(defn- migrate-routes [opts innkeeper-config]
   (m/match opts
            {:dir dir :team team}
-           (migrate/routes dir [team] {:innkeeper-url url
-                                       :oauth-token   token})
+           (migrate/routes dir [team] innkeeper-config)
 
            {:dir dir}
-           (migrate/routes dir {:innkeeper-url url
-                                :oauth-token   token})
+           (migrate/routes dir innkeeper-config)
 
            :else
            (exit 1 "Invalid options for migrate-routes")))
 
-(defn- create [opts url token]
+(defn- create [opts innkeeper-config]
   (m/match opts
            {:route route :team team}
-           (actions/create route team {:innkeeper-url url
-                                       :oauth-token   token})
+           (actions/create route team innkeeper-config)
 
            :else
            (exit 1 "Invalid options for create")))
 
-(defn- list-paths [opts url token]
+(defn- list-paths [opts innkeeper-config]
   (m/match opts
            {:team team}
            (do (println "List paths for team:" team)
-               (actions/list-paths {:team team} {:innkeeper-url url
-                                                 :oauth-token   token}))
+               (actions/list-paths {:team team} innkeeper-config))
            {}
            (do (println "List all paths")
-               (actions/list-paths {} {:innkeeper-url url
-                                       :oauth-token   token}))
+               (actions/list-paths {} innkeeper-config))
            :else
            (exit 1 "Invalid options for create")))
 
-(defn- list-path [opts url token]
+(defn- list-path [opts innkeeper-config]
   (m/match opts
            {:id path-id}
-           (actions/list-path (Integer. path-id) {:innkeeper-url url
-                                                  :oauth-token   token})
+           (actions/list-path (Integer. path-id) innkeeper-config)
 
            :else
            (exit 1 "Invalid options for hosts-for-path")))
 
-(defn- list-hosts [url token]
-  (actions/list-hosts {:innkeeper-url url
-                       :oauth-token   token}))
+(defn- list-hosts [innkeeper-config]
+  (actions/list-hosts innkeeper-config))
 
-(defn- list-routes [opts url token]
+(defn- list-routes [opts innkeeper-config]
   (m/match opts
            {:team team}
-           (actions/list-routes {:team team} {:innkeeper-url url
-                                              :oauth-token   token})
+           (actions/list-routes {:team team} innkeeper-config)
 
            {}
-           (actions/list-routes {} {:innkeeper-url url
-                                    :oauth-token   token})
+           (actions/list-routes {} innkeeper-config)
 
            :else
            (exit 1 "Invalid options for list-routes")))
 
-(defn- list-route [opts url token]
+(defn- list-route [opts innkeeper-config]
   (m/match opts
            {:id id}
-           (actions/list-route (Integer. id) {:innkeeper-url url
-                                              :oauth-token   token})
+           (actions/list-route (Integer. id) innkeeper-config)
 
            :else
            (exit 1 "Invalid options for list-route. Id should be present.")))
 
-(defn- delete-route [opts url token]
+(defn- delete-route [opts innkeeper-config]
   (m/match opts
            {:id id}
-           (actions/delete-route (Integer. id) {:innkeeper-url url
-                                                :oauth-token   token})
+           (actions/delete-route (Integer. id) innkeeper-config)
 
            :else
            (exit 1 "Invalid options for list-route. Id should be present.")))
 
 (defn- parse-action [params url token]
-  (let [options (params :options)]
+  (let [options (params :options)
+        innkeeper-config {:innkeeper-url url
+                          :oauth-token   token}]
     (m/match params
-             {:arguments ["migrate-routes"]} (migrate-routes options url token)
-             {:arguments ["create"]} (create options url token)
-             {:arguments ["list-paths"]} (list-paths options url token)
-             {:arguments ["list-path"]} (list-path options url token)
-             {:arguments ["list-routes"]} (list-routes options url token)
-             {:arguments ["list-route"]} (list-route options url token)
-             {:arguments ["delete-route"]} (delete-route options url token)
-             {:arguments ["list-hosts"]} (list-hosts url token)
+             {:arguments ["migrate-routes"]} (migrate-routes options innkeeper-config)
+             {:arguments ["create"]} (create options innkeeper-config)
+             {:arguments ["list-paths"]} (list-paths options innkeeper-config)
+             {:arguments ["list-path"]} (list-path options innkeeper-config)
+             {:arguments ["list-routes"]} (list-routes options innkeeper-config)
+             {:arguments ["list-route"]} (list-route options innkeeper-config)
+             {:arguments ["delete-route"]} (delete-route options innkeeper-config)
+             {:arguments ["list-hosts"]} (list-hosts innkeeper-config)
              :else (exit 1 "Invalid action"))))
 
 (defn -main
