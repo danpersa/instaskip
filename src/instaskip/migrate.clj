@@ -6,7 +6,8 @@
             [instaskip.route-with-path-process :as r]
             [clojure.spec :as s]
             [clojure.string :as string]
-            [instaskip.actions :as actions]))
+            [instaskip.actions :as actions]
+            [clojure.spec.test :as st]))
 
 (defn- team-names-in-dir
   "Reads the routes dir and returns a list with the names of the teams"
@@ -43,7 +44,7 @@
        (filter (fn [{:keys [_ eskip]}] (not (empty? eskip))))
        vec))
 
-(s/instrument #'teams-with-eskip)
+(st/instrument `teams-with-eskip)
 
 (defn- teams-with-eskip-maps
   "Transforms the teams with eskip vec into a teams with eskip-map vec"

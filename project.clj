@@ -3,7 +3,7 @@
   :url "https://github.com/danpersa/instaskip"
   :license {:name "MIT License"
             :url  "https://opensource.org/licenses/MIT"}
-  :dependencies [[org.clojure/clojure       "1.9.0-alpha7"]
+  :dependencies [[org.clojure/clojure       "1.9.0-alpha8"]
                  [instaparse                "1.4.1"]
                  [rhizome                   "0.2.5"]
                  [org.clojure/data.json     "0.2.6"]

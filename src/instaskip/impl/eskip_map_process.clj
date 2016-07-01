@@ -2,7 +2,8 @@
   (:require [instaskip.impl.from-eskip :as from-eskip :only [eskip->map]]
             [clojure.core.match :as m]
             [clojure.string :refer [split]]
-            [clojure.spec :as s]))
+            [clojure.spec :as s]
+            [clojure.spec.test :as st]))
 
 (defn- split-hosts
   "Splits a regex of hosts into an array of hosts."
@@ -116,4 +117,4 @@
              :hosts         (innkeeper-predicates :hosts)
              :owned-by-team team-name}}))
 
-(s/instrument #'eskip-map->route-with-path)
+(st/instrument `eskip-map->route-with-path)
