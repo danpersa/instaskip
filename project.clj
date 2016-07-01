@@ -1,4 +1,4 @@
-(defproject org.clojars.danpersa/instaskip "0.2.9"
+(defproject org.clojars.danpersa/instaskip "0.3.0"
   :description "Transforms from eskip to json to eskip."
   :url "https://github.com/danpersa/instaskip"
   :license {:name "MIT License"
