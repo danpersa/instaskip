@@ -1,10 +1,17 @@
 (ns instaskip.route-with-path-process
   [:require [instaskip.innkeeper-client :as ik]])
 
+(defn- host->host-id [hosts-to-ids host]
+
+  (let [id (hosts-to-ids host)]
+    (if (nil? id)
+      (throw (Exception. (str "Host " host " not defined in innkeeper!"))))
+    id))
 
 (defn- transform-hosts-to-ids [hosts innkeeper-config]
-  (let [hosts-to-ids (ik/hosts-to-ids innkeeper-config)]
-    (vec (map (fn [host] (hosts-to-ids host)) hosts))))
+  (let [hosts-to-ids (ik/hosts-to-ids innkeeper-config)
+        fun (partial host->host-id hosts-to-ids)]
+    (vec (map fun hosts))))
 
 (defn- path-with-hosts->path-with-host-ids [path innkeeper-config]
   {:uri           (path :uri)
@@ -15,7 +22,8 @@
   "Transforms a route-with-path to the innkeeper format.
    It uses the innkeeper-client to call innkeeper.
    If the path exists, add the :path-id to the route.
-   If not transforms the :hosts for the path to :host-ids"
+   If not transforms the :hosts for the path to :host-ids.
+   Throws an exception if the host is not defined in innkeeper."
 
   [innkeeper-config {:keys [route path]}]
 
