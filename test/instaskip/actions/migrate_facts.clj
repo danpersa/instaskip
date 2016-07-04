@@ -1,11 +1,11 @@
-(ns instaskip.migrate-facts
-  (:require [instaskip.migrate :refer :all]
+(ns instaskip.actions.migrate-facts
+  (:require [instaskip.actions.migrate :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [cats.monad.exception :as exc]
             [cats.core :as c]))
 
-(testable-privates instaskip.migrate
+(testable-privates instaskip.actions.migrate
                    team-names-in-dir
                    teams-with-eskip
                    teams-with-eskip-maps
@@ -183,7 +183,7 @@
        (fact "returns a Success of innkeeper routes"
              (to-innkeeper-routes-with-paths routes-with-paths
                                              innkeeper-config) => (exc/success [innkeeper-route-with-path
-                                                                             innkeeper-route-with-path])
+                                                                                innkeeper-route-with-path])
 
              (provided
                (#'instaskip.route-with-path-process/route-with-path->innkeeper-route-with-path

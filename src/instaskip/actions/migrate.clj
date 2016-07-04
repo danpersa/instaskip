@@ -1,4 +1,4 @@
-(ns instaskip.migrate
+(ns instaskip.actions.migrate
   (:require [me.raynes.fs :as fs]
             [cats.builtin]
             [instaskip.impl.from-eskip :as eskip]

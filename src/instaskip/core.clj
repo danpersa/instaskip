@@ -3,7 +3,7 @@
             [clojure.core.match :as m]
             [clojure.tools.logging :as log]
             [clojure.string :as string]
-            [instaskip.migrate :as migrate]
+            [instaskip.actions.migrate :as migrate]
             [instaskip.actions :as actions])
 
   (:gen-class :main true))
