@@ -32,5 +32,11 @@
   [eskip team innkeeper-config]
   (let [eskip-map (eskip/eskip->map eskip)
         route-with-path (em/eskip-map->route-with-path team eskip-map)
-        innkeeper-route-with-path (r/route-with-path->innkeeper-route-with-path innkeeper-config route-with-path)]
-    (create-innkeeper-route-with-path innkeeper-route-with-path innkeeper-config)))
+        innkeeper-route-with-path-try (r/route-with-path->innkeeper-route-with-path innkeeper-config route-with-path)]
+
+    (m/matchm innkeeper-route-with-path-try
+              {:success innkeeper-route-with-path}
+              (create-innkeeper-route-with-path innkeeper-route-with-path innkeeper-config)
+
+              {:failure ex}
+              (println "ERROR: Something went wrong: " (.getMessage ex)))))

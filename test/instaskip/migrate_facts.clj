@@ -1,7 +1,9 @@
 (ns instaskip.migrate-facts
   (:require [instaskip.migrate :refer :all]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [midje.util :refer [testable-privates]]
+            [cats.monad.exception :as exc]
+            [cats.core :as c]))
 
 (testable-privates instaskip.migrate
                    team-names-in-dir
@@ -10,8 +12,9 @@
                    path-without-star-predicate?
                    host-predicate?
                    filter-teams-with-eskip-maps
-                   routes-with-paths
-                   has-element?)
+                   to-routes-with-paths
+                   has-element?
+                   to-innkeeper-routes-with-paths)
 
 (facts "team-names-in-dir"
        (fact "returns the teams"
@@ -131,17 +134,17 @@
                            [{:name "Host"}
                             {:name "Path" :args [{:value "/hello"}]}]}}]))
 
-(facts "routes-with-paths"
+(facts "to-routes-with-paths"
        (fact "transforms to routes-with-paths"
-             (routes-with-paths [{:team      "team1"
-                                  :eskip-map {:name       "theroute"
-                                              :predicates [{:name "Host"
-                                                            :args [{:type "regex" :value "/^(host1.com|host2.com)$/"}]}
-                                                           {:name "Path"
-                                                            :args [{:type "string" :value "/hello"}]}]
-                                              :filters    []
-                                              :endpoint   ""
-                                              }}]) =>
+             (to-routes-with-paths [{:team      "team1"
+                                     :eskip-map {:name       "theroute"
+                                                 :predicates [{:name "Host"
+                                                               :args [{:type "regex" :value "/^(host1.com|host2.com)$/"}]}
+                                                              {:name "Path"
+                                                               :args [{:type "string" :value "/hello"}]}]
+                                                 :filters    []
+                                                 :endpoint   ""
+                                                 }}]) =>
              [{:path  {:hosts         ["host1.com" "host2.com"]
                        :owned-by-team "team1"
                        :uri           "/hello"}
@@ -150,3 +153,56 @@
                        :filters             []
                        :endpoint            ""
                        :uses-common-filters false}}]))
+
+(def innkeeper-config {:innkeeper-url "url" :oauth-token "token"})
+
+(defn route-with-path [name hosts] {:path  {:hosts         hosts
+                                            :owned-by-team "team1"
+                                            :uri           "/hello"}
+                                    :route {:name                name
+                                            :predicates          []
+                                            :filters             []
+                                            :endpoint            ""
+                                            :uses-common-filters false}})
+
+(def route-with-path-1 (route-with-path "theroute1" ["host1.com" "host2.com"]))
+(def route-with-path-2 (route-with-path "theroute2" ["host2.com" "host3.com"]))
+
+(def routes-with-paths [route-with-path-1 route-with-path-2])
+
+(def innkeeper-route-with-path {:path  {:host-ids      [1 2]
+                                        :owned-by-team "team1"
+                                        :uri           "/hello"}
+                                :route {:name                "theroute"
+                                        :predicates          []
+                                        :filters             []
+                                        :endpoint            ""
+                                        :uses-common-filters false}})
+
+(facts "to-innkeeper-routes-with-paths"
+       (fact "returns a Success of innkeeper routes"
+             (to-innkeeper-routes-with-paths routes-with-paths
+                                             innkeeper-config) => (exc/success [innkeeper-route-with-path
+                                                                             innkeeper-route-with-path])
+
+             (provided
+               (#'instaskip.route-with-path-process/route-with-path->innkeeper-route-with-path
+                 innkeeper-config
+                 route-with-path-1) => (exc/success innkeeper-route-with-path)
+               (#'instaskip.route-with-path-process/route-with-path->innkeeper-route-with-path
+                 innkeeper-config
+                 route-with-path-2) => (exc/success innkeeper-route-with-path)))
+
+       (fact "returns a Failure in case something fails"
+             (-> (to-innkeeper-routes-with-paths routes-with-paths
+                                                 innkeeper-config)
+                 c/extract
+                 ex-data) => {:host "host3.com"}
+
+             (provided
+               (#'instaskip.route-with-path-process/route-with-path->innkeeper-route-with-path
+                 innkeeper-config
+                 route-with-path-1) => (exc/success innkeeper-route-with-path)
+               (#'instaskip.route-with-path-process/route-with-path->innkeeper-route-with-path
+                 innkeeper-config
+                 route-with-path-2) => (exc/failure (ex-info "" {:host "host3.com"})))))

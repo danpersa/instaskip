@@ -7,7 +7,13 @@
             [clojure.spec :as s]
             [clojure.string :as string]
             [instaskip.actions :as actions]
-            [clojure.spec.test :as st]))
+            [clojure.spec.test :as st]
+            [cats.core :as c]
+            [cats.builtin]
+            [cats.context :as ctx]
+            [cats.monad.exception :as exc]
+            [clojure.core.match :as m]
+            [instaskip.cats-match]))
 
 (defn- team-names-in-dir
   "Reads the routes dir and returns a list with the names of the teams"
@@ -94,7 +100,7 @@
              (has-element? predicates path-without-star-predicate?))))
     teams-with-eskip-maps))
 
-(defn- routes-with-paths
+(defn- to-routes-with-paths
   "Transforms a vec of teams-with-eskip-maps into a vec of routes-with-paths"
 
   [teams-with-eskip-maps]
@@ -103,13 +109,14 @@
               (em/eskip-map->route-with-path team eskip-map)))))
 
 
-(defn- innkeeper-routes-with-paths
-  "Transforms a vec of routes-with-paths into a vec of innkeeper-routes-with-paths"
+(defn- to-innkeeper-routes-with-paths
+  "Transforms a vec of exc routes-with-paths into a vec of try innkeeper-routes-with-paths"
 
   [routes-with-paths innkeeper-config]
 
-  (->> routes-with-paths
-       (map (partial r/route-with-path->innkeeper-route-with-path innkeeper-config))))
+  (let [routes-to-innkeeper-fn (partial r/route-with-path->innkeeper-route-with-path innkeeper-config)]
+    (ctx/with-context exc/context
+                      (c/traverse routes-to-innkeeper-fn routes-with-paths))))
 
 (defn routes
   "Migrates the routes in the dir to the innkeeper instance with the specified url, using the token.
@@ -124,20 +131,26 @@
    (let [teams-with-eskip (teams-with-eskip teams routes-dir)
          teams-with-eskip-maps (teams-with-eskip-maps teams-with-eskip)
          filtered-teams-with-eskip-maps (filter-teams-with-eskip-maps teams-with-eskip-maps)
-         routes-with-paths (routes-with-paths filtered-teams-with-eskip-maps)
-         innkeeper-routes-with-paths (innkeeper-routes-with-paths routes-with-paths innkeeper-config)]
+         routes-with-paths (to-routes-with-paths filtered-teams-with-eskip-maps)
+         innkeeper-routes-with-paths-try (to-innkeeper-routes-with-paths routes-with-paths innkeeper-config)]
 
      (println "Found" (count teams) "team(s).")
      (println "Found" (count teams-with-eskip) "eskip file(s).")
      (println "Transformed" (count teams-with-eskip-maps) "to eskip maps.")
      (println "Filtered to" (count filtered-teams-with-eskip-maps) "eskip maps.")
      (println "Transformed eskip maps to" (count routes-with-paths) "routes with paths.")
-     (println "Transformed routes with paths to"
-              (count innkeeper-routes-with-paths)
-              "innkeeper routes with paths.")
 
-     (doseq [route-with-path innkeeper-routes-with-paths]
-       (actions/create-innkeeper-route-with-path route-with-path innkeeper-config))))
+     (m/matchm innkeeper-routes-with-paths-try
+               {:success innkeeper-routes-with-paths}
+               (do
+                 (println "Transformed routes with paths to"
+                          (count innkeeper-routes-with-paths)
+                          "innkeeper routes with paths.")
+                 (doseq [route-with-path innkeeper-routes-with-paths]
+                   (actions/create-innkeeper-route-with-path route-with-path innkeeper-config)))
+
+               {:failure ex}
+               (println "ERROR: Something went wrong: " (.getMessage ex)))))
+
   ([routes-dir innkeeper-config]
    (routes routes-dir (team-names-in-dir routes-dir) innkeeper-config)))
-
