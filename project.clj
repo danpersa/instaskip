@@ -13,7 +13,8 @@
                  [org.clojure/tools.logging "0.3.1"]
                  [me.raynes/fs              "1.4.6"]
                  [org.clojure/tools.cli     "0.3.5"]
-                 [table                     "0.5.0"]]
+                 [table                     "0.5.0"]
+                 [funcool/cats              "1.2.1"]]
   :main instaskip.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
