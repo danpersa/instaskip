@@ -22,7 +22,7 @@
         {:keys [id uri host-ids]} path
         ids-to-hosts (ik/ids-to-hosts innkeeper-config)
         hosts (map (fn [id] {:hosts (ids-to-hosts id)}) host-ids)]
-    (println "Path with id" id)
+    (cl/info "Path with id" id)
     (t/table (select-keys path [:id :uri :owned-by-team :created-by :created-at :updated-at]))
-    (println "Hosts for path with uri: " uri)
+    (cl/info "Hosts for path with uri: " uri)
     (t/table hosts)))

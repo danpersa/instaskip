@@ -11,21 +11,21 @@
             route-name (innkeeper-route :name)
             new-host-ids (path :host-ids)
             existing-host-ids (existing-path :host-ids)]
-        (println "Found existing path with uri:" (existing-path :uri))
+        (cl/info "Found existing path with uri:" (existing-path :uri))
 
         (if (not= (set existing-host-ids) (set new-host-ids))
-          (do (println "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
+          (do (cl/info "Updating host-ids from " (sort existing-host-ids) "to" (sort new-host-ids))
               (ik/patch-path path-id {:host-ids new-host-ids} innkeeper-config)))
         (let [existing-routes (ik/get-routes {:name route-name} innkeeper-config)]
           (if (empty? existing-routes)
-            (do (println "Posting a new route with name: " route-name)
+            (do (cl/info "Posting a new route with name: " route-name)
                 (ik/post-route innkeeper-route innkeeper-config))
-            (println "Found existing route with name:" route-name))))
+            (cl/info "Found existing route with name:" route-name))))
 
       (let [innkeeper-path (ik/post-path path innkeeper-config)
             innkeeper-route (assoc route :path-id (innkeeper-path :id))]
-        (println "Posting a new path with uri: " (innkeeper-path :uri))
-        (println "Posting a new route with name: " (innkeeper-route :name))
+        (cl/info "Posting a new path with uri: " (innkeeper-path :uri))
+        (cl/info "Posting a new route with name: " (innkeeper-route :name))
         (ik/post-route innkeeper-route innkeeper-config)))))
 
 (defn create
@@ -39,4 +39,4 @@
               (create-innkeeper-route-with-path innkeeper-route-with-path innkeeper-config)
 
               {:failure ex}
-              (println "ERROR: Something went wrong: " (.getMessage ex)))))
+              (cl/error ex))))

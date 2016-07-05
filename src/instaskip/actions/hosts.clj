@@ -5,7 +5,7 @@
 
     (m/matchm ids-to-hosts-try
               {:success ids-to-hosts}
-              (do (println "All hosts")
+              (do (cl/info "All hosts")
                   (t/table ids-to-hosts))
               {:failure ex}
-              (cl/error (.getMessage ex)))))
+              (cl/error ex))))

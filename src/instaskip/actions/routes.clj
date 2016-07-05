@@ -9,7 +9,7 @@
                         :else
                         (ik/get-routes innkeeper-config))
         filtered-routes (map #(select-keys % [:id :name :endpoint]) routes)]
-    (println "List routes")
+    (cl/info "List routes")
     (t/table filtered-routes)))
 
 (defn list-route [id innkeeper-config]
@@ -17,15 +17,15 @@
         filtered-route (select-keys route [:id :name :path-id :created-by
                                            :activate-at :created-at
                                            :uses-common-filters :endpoint])]
-    (println "List route wiht id" id)
+    (cl/info "List route wiht id" id)
     (t/table filtered-route)
-    (println "Filters for the route")
+    (cl/info "Filters for the route")
     (t/table (route :filters))
-    (println "Predicates for the route")
+    (cl/info "Predicates for the route")
     (t/table (route :predicates))))
 
 
 (defn delete-route [id innkeeper-config]
-  (println "Deleting route with id" id)
+  (cl/info "Deleting route with id" id)
   (ik/delete-route id innkeeper-config)
-  (println "Done"))
+  (cl/info "Done"))
