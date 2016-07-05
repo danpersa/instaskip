@@ -8,10 +8,11 @@
 (defn- host->host-id [hosts-to-ids host]
 
   (exc/try-on
-    (let [id (hosts-to-ids host)]
-      (if (nil? id)
-        (throw (ex-info (str "Host " host " not defined in innkeeper!") {:host host})))
-      id)))
+    (if-let [id (hosts-to-ids host)]
+      id
+      (throw
+        (ex-info
+          (str "Host " host " not defined in innkeeper!") {:host host})))))
 
 (defn- hosts->ids [hosts innkeeper-config]
   (let [hosts-to-ids (ik/hosts-to-ids innkeeper-config)
