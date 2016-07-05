@@ -3,8 +3,9 @@
             [clojure.core.match :as m]
             [clojure.tools.logging :as log]
             [clojure.string :as string]
-            [instaskip.migrate :as migrate]
-            [instaskip.actions :as actions])
+            [instaskip.actions.migrate :as migrate]
+            [instaskip.actions :as actions]
+            [instaskip.console-log :as cl])
 
   (:gen-class :main true))
 
@@ -19,7 +20,7 @@
 
 (defn- exit
   ([status msg]
-   (println msg)
+   (cl/info msg)
    (System/exit status))
   ([status] (System/exit status)))
 
@@ -64,10 +65,10 @@
 (defn- list-paths [opts innkeeper-config]
   (m/match opts
            {:team team}
-           (do (println "List paths for team:" team)
+           (do (cl/info "List paths for team:" team)
                (actions/list-paths {:team team} innkeeper-config))
            {}
-           (do (println "List all paths")
+           (do (cl/info "List all paths")
                (actions/list-paths {} innkeeper-config))
            :else
            (exit 1 "Invalid options for create")))

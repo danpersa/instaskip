@@ -1,4 +1,4 @@
-(ns instaskip.migrate
+(ns instaskip.actions.migrate
   (:require [me.raynes.fs :as fs]
             [cats.builtin]
             [instaskip.impl.from-eskip :as eskip]
@@ -13,7 +13,8 @@
             [cats.context :as ctx]
             [cats.monad.exception :as exc]
             [clojure.core.match :as m]
-            [instaskip.cats-match]))
+            [instaskip.cats-match]
+            [instaskip.console-log :as cl]))
 
 (defn- team-names-in-dir
   "Reads the routes dir and returns a list with the names of the teams"
@@ -123,7 +124,7 @@
    The token should have innkeeper admin scope"
 
   ([routes-dir teams innkeeper-config]
-   (println "Migrate routes. Eskip dir: " routes-dir
+   (cl/info "Migrate routes. Eskip dir: " routes-dir
             "\nTeams: " teams
             "\nInnkeeper url: " (innkeeper-config :url)
             "\nOAuth token: " (innkeeper-config :token))
@@ -134,23 +135,23 @@
          routes-with-paths (to-routes-with-paths filtered-teams-with-eskip-maps)
          innkeeper-routes-with-paths-try (to-innkeeper-routes-with-paths routes-with-paths innkeeper-config)]
 
-     (println "Found" (count teams) "team(s).")
-     (println "Found" (count teams-with-eskip) "eskip file(s).")
-     (println "Transformed" (count teams-with-eskip-maps) "to eskip maps.")
-     (println "Filtered to" (count filtered-teams-with-eskip-maps) "eskip maps.")
-     (println "Transformed eskip maps to" (count routes-with-paths) "routes with paths.")
+     (cl/info "Found" (count teams) "team(s).")
+     (cl/info "Found" (count teams-with-eskip) "eskip file(s).")
+     (cl/info "Transformed" (count teams-with-eskip-maps) "to eskip maps.")
+     (cl/info "Filtered to" (count filtered-teams-with-eskip-maps) "eskip maps.")
+     (cl/info "Transformed eskip maps to" (count routes-with-paths) "routes with paths.")
 
      (m/matchm innkeeper-routes-with-paths-try
                {:success innkeeper-routes-with-paths}
                (do
-                 (println "Transformed routes with paths to"
+                 (cl/info "Transformed routes with paths to"
                           (count innkeeper-routes-with-paths)
                           "innkeeper routes with paths.")
                  (doseq [route-with-path innkeeper-routes-with-paths]
                    (actions/create-innkeeper-route-with-path route-with-path innkeeper-config)))
 
                {:failure ex}
-               (println "ERROR: Something went wrong: " (.getMessage ex)))))
+               (cl/error ex))))
 
   ([routes-dir innkeeper-config]
    (routes routes-dir (team-names-in-dir routes-dir) innkeeper-config)))
