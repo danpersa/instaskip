@@ -52,7 +52,7 @@
            (migrate/routes dir innkeeper-config)
 
            :else
-           (exit 1 "Invalid options for migrate-routes")))
+           (exit 1 "Invalid options for migrate-routes. The -d flag is mandatory.")))
 
 (defn- create [opts innkeeper-config]
   (m/match opts
@@ -60,7 +60,7 @@
            (actions/create route team innkeeper-config)
 
            :else
-           (exit 1 "Invalid options for create")))
+           (exit 1 "Invalid options for create. Both -R and -T flags should be present.")))
 
 (defn- list-paths [opts innkeeper-config]
   (m/match opts
@@ -79,7 +79,7 @@
            (actions/list-path (Integer. path-id) innkeeper-config)
 
            :else
-           (exit 1 "Invalid options for hosts-for-path")))
+           (exit 1 "Invalid options for hosts-for-path. The -i flag should be present.")))
 
 (defn- list-hosts [innkeeper-config]
   (actions/list-hosts innkeeper-config))
@@ -93,7 +93,7 @@
            (actions/list-routes {} innkeeper-config)
 
            :else
-           (exit 1 "Invalid options for list-routes")))
+           (exit 1 "Invalid options for list-routes.")))
 
 (defn- list-route [opts innkeeper-config]
   (m/match opts
@@ -101,7 +101,7 @@
            (actions/list-route (Integer. id) innkeeper-config)
 
            :else
-           (exit 1 "Invalid options for list-route. Id should be present.")))
+           (exit 1 "Invalid options for list-route. The -i flag should be present.")))
 
 (defn- delete-route [opts innkeeper-config]
   (m/match opts
@@ -109,7 +109,7 @@
            (actions/delete-route (Integer. id) innkeeper-config)
 
            :else
-           (exit 1 "Invalid options for list-route. Id should be present.")))
+           (exit 1 "Invalid options for list-route. The -i flag should be present.")))
 
 (defn- parse-action [params url token]
   (let [options (params :options)
