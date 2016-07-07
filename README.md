@@ -11,14 +11,14 @@ Download from https://clojars.org/org.clojars.danpersa/instaskip.
 
 For lein users
 
-    [org.clojars.danpersa/instaskip 0.3.1]
+    [org.clojars.danpersa/instaskip 0.3.2]
 
 For maven users
 
     <dependency>
       <groupId>org.clojars.danpersa</groupId>
       <artifactId>instaskip</artifactId>
-      <version>0.3.1</version>
+      <version>0.3.2</version>
     </dependency>
 
 ## Publishing
