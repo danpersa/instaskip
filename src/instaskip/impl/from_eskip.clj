@@ -2,7 +2,7 @@
   (:require [instaparse.core :as insta]
             [clojure.data.json :as json]))
 
-(def ^{:private true} eskip-routes-parser
+(def ^:private eskip-routes-parser
   "returns an parser for eskip routes"
   (insta/parser
     "

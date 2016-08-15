@@ -5,15 +5,74 @@
             [clojure.spec :as s]
             [clojure.spec.test :as st]))
 
-(defn- split-hosts
-  "Splits a regex of hosts into an array of hosts."
-  [hosts-string]
+(defn- trim-hosts [hosts-string]
+  (if-some [trimmed-hosts (re-find (re-pattern "\\/\\^(.+)\\$\\/") hosts-string)]
+    (peek trimmed-hosts)
+    hosts-string))
 
-  (let [trimmed-hosts (->> hosts-string
-                           (re-find (re-pattern "\\/\\^\\((.*)\\)\\$\\/"))
-                           peek)
-        hosts-with-normalized-dot (.replace trimmed-hosts "[.]" ".")]
+(trim-hosts "/^(www|m)[.]host1[.]com$/")
+
+(defn- split-hosts-cond [regex hosts-string]
+  (not-empty
+    (->> hosts-string
+         (re-find (re-pattern regex)))))
+
+(def ^:private case-to-regex
+  {:prefix-and-suffix "\\((.+)\\)(.+)\\((.+)\\)"
+   :prefix            "\\((.+)\\)(.+)"
+   :suffix            "(.+)\\((.+)\\)"
+   :list-of-hosts     "\\((.+)\\)"})
+
+
+(split-hosts-cond (case-to-regex :prefix) "(www|m)[.]host1[.]com")
+(split-hosts-cond (case-to-regex :suffix) "m[.]host1[.](com|de)")
+
+(defn- split-hosts-dispatch [hosts-string]
+
+  (let [trimmed-hosts (trim-hosts hosts-string)]
+    (cond
+      (split-hosts-cond (case-to-regex :prefix-and-suffix) trimmed-hosts) :prefix-and-suffix
+      (split-hosts-cond (case-to-regex :prefix) trimmed-hosts) :prefix
+      (split-hosts-cond (case-to-regex :suffix) trimmed-hosts) :suffix
+      (split-hosts-cond (case-to-regex :list-of-hosts) trimmed-hosts) :list-of-hosts)))
+
+(defmulti split-hosts split-hosts-dispatch)
+
+(defmethod split-hosts :list-of-hosts [hosts-string]
+  (let [trimmed-hosts (trim-hosts hosts-string)
+        hosts (->> trimmed-hosts
+                   (re-find (re-pattern (case-to-regex :list-of-hosts)))
+                   peek)
+        hosts-with-normalized-dot (.replace hosts "[.]" ".")]
     (split hosts-with-normalized-dot #"[|]")))
+
+(defn- combine-prefix-mid-suffix [prefixes middle suffixes]
+  (let [hosts (for [prefix (split prefixes #"[|]")
+                    suffix (split suffixes #"[|]")]
+                (str prefix middle suffix))
+        hosts-with-normalized-dot (map #(.replace % "[.]" ".") hosts)]
+    hosts-with-normalized-dot))
+
+(defmethod split-hosts :prefix-and-suffix [hosts-string]
+  (let [trimmed-hosts (trim-hosts hosts-string)
+        [_ prefixes middle suffixes]
+        (->> trimmed-hosts
+             (re-find (re-pattern (case-to-regex :prefix-and-suffix))))]
+    (combine-prefix-mid-suffix prefixes middle suffixes)))
+
+(defmethod split-hosts :prefix [hosts-string]
+  (let [trimmed-hosts (trim-hosts hosts-string)
+        [_ prefixes middle]
+        (->> trimmed-hosts
+             (re-find (re-pattern (case-to-regex :prefix))))]
+    (combine-prefix-mid-suffix prefixes middle "")))
+
+(defmethod split-hosts :suffix [hosts-string]
+  (let [trimmed-hosts (trim-hosts hosts-string)
+        [_ middle suffixes]
+        (->> trimmed-hosts
+             (re-find (re-pattern (case-to-regex :suffix))))]
+    (combine-prefix-mid-suffix "" middle suffixes)))
 
 (def ^{:private true} common-filters #{"fashionStore"})
 
