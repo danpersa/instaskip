@@ -3,7 +3,7 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/org.clojars.danpersa/instaskip.svg)](https://clojars.org/org.clojars.danpersa/instaskip)
 
-Transforms from eskip to json to eskip.
+CLI for innkeeper
 
 ## Installation
 
