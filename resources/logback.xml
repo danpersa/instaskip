@@ -5,10 +5,10 @@
         </encoder>
     </appender>
 
-    <root level="debug">
+    <root level="error">
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="instaskip" level="info"/>
-    <logger name="instaskip.impl" level="debug"/>
+    <logger name="instaskip" level="error"/>
+    <logger name="instaskip.impl" level="error"/>
 </configuration>

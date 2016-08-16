@@ -7,9 +7,12 @@
             [table.core :as t]
             [clojure.string :as string]
             [cats.monad.exception :as exc]
-            [instaskip.console-log :as cl]))
+            [instaskip.console-log :as cl]
+            [clojure.core.async :as async]
+            [clojure.tools.cli :refer [parse-opts]]))
 
 (load "actions/create")
 (load "actions/paths")
 (load "actions/routes")
 (load "actions/hosts")
+(load "actions/repl")

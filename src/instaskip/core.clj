@@ -5,7 +5,8 @@
             [clojure.string :as string]
             [instaskip.actions.migrate :as migrate]
             [instaskip.actions :as actions]
-            [instaskip.console-log :as cl])
+            [instaskip.console-log :as cl]
+            [clojure.core.async :as async])
 
   (:gen-class :main true))
 
@@ -33,14 +34,15 @@
         options-summary
         ""
         "Actions:"
-        "  migrate-routes        Migrates the routes from an eskip directory to innkeeper"
-        "  create                Posts an eskip path and route to innkeeper"
-        "  list-paths            Lists the paths. Can be filtered by team"
-        "  list-path             Details for a path. Needs a path id"
-        "  list-routes           Lists the routes. Can be filtered by team"
-        "  list-route            Lists a specific route. Needs an id"
-        "  delete-route          Deletes a specific route. Needs an id"
-        "  list-hosts            Lists the hosts"]
+        "  migrate-routes        Migrates the routes from an eskip directory to innkeeper."
+        "  create                Posts an eskip path and route to innkeeper."
+        "  list-paths            Lists the paths. Can be filtered by team."
+        "  list-path             Details for a path. Needs a path id."
+        "  list-routes           Lists the routes. Can be filtered by team."
+        "  list-route            Lists a specific route. Needs an id."
+        "  delete-route          Deletes a specific route. Needs an id."
+        "  repl                  Starts the instakip REPL."
+        "  list-hosts            Lists the hosts."]
        (string/join \newline)))
 
 (defn- migrate-routes [opts innkeeper-config]
@@ -111,6 +113,17 @@
            :else
            (exit 1 "Invalid options for list-route. The -i flag should be present.")))
 
+(defn- repl [opts innkeeper-config]
+  (m/match opts
+
+           {}
+           (let [chan (async/chan 1)]
+             (actions/repl chan innkeeper-config)
+             (actions/repl-stdin chan))
+
+           :else
+           (exit 1 "Invalid options for repl.")))
+
 (defn- parse-action [params url token]
   (let [options (params :options)
         innkeeper-config {:innkeeper-url url
@@ -124,11 +137,13 @@
              {:arguments ["list-route"]} (list-route options innkeeper-config)
              {:arguments ["delete-route"]} (delete-route options innkeeper-config)
              {:arguments ["list-hosts"]} (list-hosts innkeeper-config)
+             {:arguments ["repl"]} (repl {} innkeeper-config)
              :else (exit 1 "Invalid action"))))
 
 (defn -main
   "The application's main function"
   [& args]
+  (println args)
   (let [params (parse-opts args cli-options :in-order false)]
     (log/debug params)
     (m/match params
